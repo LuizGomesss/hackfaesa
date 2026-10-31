@@ -61,7 +61,7 @@ export function useGoogleMap({
         const { Polyline } = await loadGoogleMaps();
         routeLineRef.current = new Polyline({
           map,
-          strokeColor: "#1269df",
+          strokeColor: "#0b4f8c",
           strokeWeight: 5,
           strokeOpacity: 0.9,
           clickable: false,

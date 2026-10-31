@@ -1,12 +1,31 @@
-import DirectionsBus from "@mui/icons-material/DirectionsBus";
-import Schedule from "@mui/icons-material/Schedule";
-import SwapHoriz from "@mui/icons-material/SwapHoriz";
-import styles from "./informacoes-basicas-viagem.module.css";
+import { ArrowLeftRight, Bus, Clock } from "lucide-react";
+import type { ReactNode } from "react";
+import { cn } from "@/shared/lib/utils";
 
 export interface InformacoesBasicasViagemProps {
   tempoEstimado: string;
   trocas: number;
   linhas: { codigo: string; cor: "azul" | "verde" }[];
+}
+
+function Item({
+  icone,
+  titulo,
+  children,
+}: {
+  icone: ReactNode;
+  titulo: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-2">
+      <dt className="flex items-center gap-1 text-xs text-muted-foreground">
+        {icone}
+        {titulo}
+      </dt>
+      <dd className="mt-1 font-semibold">{children}</dd>
+    </div>
+  );
 }
 
 export function InformacoesBasicasViagem({
@@ -15,42 +34,40 @@ export function InformacoesBasicasViagem({
   linhas,
 }: InformacoesBasicasViagemProps) {
   return (
-    <dl className={styles.root} aria-label="Informações básicas da viagem">
-      <div className={styles.card}>
-        <Schedule className={styles.icon} aria-hidden="true" />
-        <div className={styles.content}>
-          <dt>Tempo estimado</dt>
-          <dd>{tempoEstimado}</dd>
-        </div>
-      </div>
-      <div className={styles.card}>
-        <span className={styles.transferIcon}>
-          <SwapHoriz className={styles.icon} aria-hidden="true" />
+    <dl
+      className="grid grid-cols-3 gap-2"
+      aria-label="Informações básicas da viagem"
+    >
+      <Item
+        icone={<Clock className="size-3.5" aria-hidden="true" />}
+        titulo="Tempo"
+      >
+        {tempoEstimado}
+      </Item>
+      <Item
+        icone={<ArrowLeftRight className="size-3.5" aria-hidden="true" />}
+        titulo="Trocas"
+      >
+        {trocas}
+      </Item>
+      <Item
+        icone={<Bus className="size-3.5" aria-hidden="true" />}
+        titulo="Linhas"
+      >
+        <span className="flex flex-wrap gap-1">
+          {linhas.map((linha) => (
+            <span
+              key={linha.codigo}
+              className={cn(
+                "rounded-full px-2 text-sm text-primary-foreground",
+                linha.cor === "azul" ? "bg-primary" : "bg-(--lotacao-baixa)",
+              )}
+            >
+              {linha.codigo}
+            </span>
+          ))}
         </span>
-        <div className={styles.content}>
-          <dt>Trocas</dt>
-          <dd>{trocas}</dd>
-        </div>
-      </div>
-      <div className={styles.card}>
-        <DirectionsBus
-          className={`${styles.icon} ${styles.busIcon}`}
-          aria-hidden="true"
-        />
-        <div className={styles.content}>
-          <dt>Linhas</dt>
-          <dd className={styles.lines}>
-            {linhas.map((linha) => (
-              <span
-                key={linha.codigo}
-                className={`${styles.pill} ${styles[linha.cor]}`}
-              >
-                {linha.codigo}
-              </span>
-            ))}
-          </dd>
-        </div>
-      </div>
+      </Item>
     </dl>
   );
 }

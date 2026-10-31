@@ -1,348 +1,111 @@
 @import "tailwindcss";
 
+/*
+ * Paleta inspirada nas cores da bandeira do Espírito Santo (azul, branco e rosa).
+ * Não usar brasão nem logotipo oficial sem autorização do Governo do Estado.
+ */
 :root {
-  --ink: #101a3b;
-  --muted: #607291;
-  --blue: #1269df;
-  --green: #009b58;
-  --line: #dbe4f0;
+  --background: #f3f6fa;
+  --foreground: #10233a;
+  --card: #ffffff;
+  --card-foreground: #10233a;
+  --primary: #0b4f8c;
+  --primary-foreground: #ffffff;
+  --secondary: #e6eef6;
+  --secondary-foreground: #0b3c69;
+  --muted: #eef2f6;
+  --muted-foreground: #4a5b6e;
+  --accent: #b5175c;
+  --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --border: #c6d2de;
+  --input: #71849a;
+  --ring: #b5175c;
+  --radius: 0.75rem;
+
+  --lotacao-baixa: #0f6b3f;
+  --lotacao-baixa-fundo: #e2f4ea;
+  --lotacao-media: #7a5200;
+  --lotacao-media-fundo: #fdf1d3;
+  --lotacao-alta: #a8320a;
+  --lotacao-alta-fundo: #fde8dd;
+  --lotacao-critica: #a11212;
+  --lotacao-critica-fundo: #fbe2e2;
 }
 
-* { box-sizing: border-box; }
+html[data-contraste="alto"] {
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --primary: #002f5f;
+  --secondary: #ffffff;
+  --secondary-foreground: #000000;
+  --muted: #ffffff;
+  --muted-foreground: #000000;
+  --accent: #80003c;
+  --border: #000000;
+  --input: #000000;
+  --ring: #80003c;
+  --lotacao-baixa: #004d29;
+  --lotacao-baixa-fundo: #ffffff;
+  --lotacao-media: #4d3300;
+  --lotacao-media-fundo: #ffffff;
+  --lotacao-alta: #6b1d00;
+  --lotacao-alta-fundo: #ffffff;
+  --lotacao-critica: #6e0000;
+  --lotacao-critica-fundo: #ffffff;
+}
 
-html, body { margin: 0; min-height: 100%; }
+html[data-texto="grande"] {
+  font-size: 125%;
+}
+
+html[data-movimento="reduzido"] *,
+html[data-movimento="reduzido"] *::before,
+html[data-movimento="reduzido"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
 
 body {
-  color: var(--ink);
-  background: #eef3fa;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-button { font: inherit; }
-
-.trip-shell {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  padding: 0;
-}
-
-.trip-card {
-  width: min(100%, 900px);
-  min-height: 100vh;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 0 0 1px #d7e0ec, 0 20px 60px #2436531f;
-}
-
-.status-bar {
-  height: 40px;
-  padding: 9px 28px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #0d1530;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.status-bar span { letter-spacing: 1px; font-size: 13px; }
-
-.trip-header {
-  height: 80px;
-  padding: 0 28px;
-  display: grid;
-  grid-template-columns: 48px 1fr 48px;
-  align-items: center;
-  gap: 14px;
-}
-
-.trip-header h1 {
-  margin: 0;
-  color: var(--ink);
-  font-size: clamp(25px, 4.8vw, 39px);
-  font-weight: 800;
-  letter-spacing: -1.4px;
-  white-space: nowrap;
-}
-
-.shared-text { margin: 0; }
-.shared-text.MuiTypography-root { font-family: inherit; }
-
-.icon-button.MuiIconButton-root {
-  width: 48px;
-  height: 48px;
-  display: inline-grid;
-  place-items: center;
-  padding: 0;
-  color: var(--ink);
-  border-radius: 50%;
-  background: transparent;
-}
-
-.icon-button.MuiIconButton-root:hover { background: #f1f5fa; }
-
-.route-editor {
-  position: relative;
-  display: grid;
-  gap: 12px;
-  margin: 0 30px;
-}
-
-.route-field {
-  min-height: 96px;
-  padding: 16px 28px 14px 98px;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: linear-gradient(110deg, #f8fafc 0%, #f0f4f9 100%);
-}
-
-.route-field .shared-text {
-  color: var(--muted);
-  font-size: clamp(18px, 2.8vw, 26px);
-  line-height: 1.18;
-  margin-bottom: 6px;
-}
-
-.route-field strong {
-  display: block;
-  color: var(--ink);
-  font-size: clamp(19px, 3.2vw, 29px);
-  line-height: 1.12;
-  letter-spacing: -0.45px;
-  white-space: nowrap;
-}
-
-.route-line {
-  position: absolute;
-  z-index: 1;
-  top: 27px;
-  bottom: 27px;
-  left: 43px;
-  width: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.route-line > span:not(.route-dot) {
-  flex: 1;
-  border-left: 5px dotted #9aacc6;
-}
-
-.route-dot {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  border: 7px solid white;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px currentColor;
-}
-
-.route-dot--blue { color: var(--blue); background: var(--blue); }
-.route-dot--green { color: var(--green); background: var(--green); }
-
-.swap-button.MuiIconButton-root {
-  position: absolute;
-  z-index: 3;
-  top: 65px;
-  right: 10px;
-  width: 76px;
-  height: 76px;
-  background: #fff;
-  box-shadow: 0 10px 25px #273a571f;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1.15fr .82fr 1.2fr;
-  gap: 14px;
-  margin: 18px 30px;
-}
-
-.stat-card {
-  min-width: 0;
-  min-height: 102px;
-  padding: 14px 22px;
-  display: flex;
-  align-items: center;
-  gap: 17px;
-  border: 1px solid var(--line);
-  border-radius: 21px;
-  background: #fff;
-}
-
-.stat-card > svg { flex: 0 0 auto; }
-
-.stat-card .shared-text {
-  color: var(--muted);
-  font-size: clamp(16px, 2.2vw, 23px);
-  line-height: 1.15;
-  margin-bottom: 7px;
-}
-
-.stat-card strong { display: block; font-size: clamp(22px, 3vw, 31px); line-height: 1; }
-
-.stat-icon--muted {
-  width: 58px;
-  height: 58px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #f2f5fa;
-}
-
-.pill-row { display: flex; gap: 10px; margin-top: 4px; }
-
-.transit-pill.MuiChip-root {
-  min-width: 72px;
-  height: 44px;
-  padding: 0 15px;
-  border-radius: 22px;
-  color: white;
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.transit-pill .MuiChip-label { padding: 0; }
-.transit-pill--blue.MuiChip-root { background: var(--blue); }
-.transit-pill--green.MuiChip-root { background: var(--green); }
-
-.route-map {
-  position: relative;
-  height: clamp(420px, 76vw, 680px);
-  overflow: hidden;
-  background: #edf2f5;
-}
-
-.route-map__art { width: 100%; height: 100%; display: block; }
-
-/* Reserved map surface: the layout stays identical while map data is unavailable. */
-.map-placeholder {
-  position: relative;
-  height: clamp(420px, 76vw, 680px);
-  overflow: hidden;
-  background:
-    linear-gradient(28deg, transparent 45%, #d5e0e5 46%, #d5e0e5 47%, transparent 48%),
-    linear-gradient(112deg, transparent 48%, #e0e6ea 49%, #e0e6ea 50%, transparent 51%),
-    linear-gradient(0deg, #d8efd9 0 14%, transparent 15% 100%),
-    #eef1f4;
-  background-size: 180px 150px, 220px 170px, 100% 100%, 100% 100%;
-}
-
-.map-placeholder__content { display: none; }
-
-.map-control.MuiIconButton-root {
-  position: absolute;
-  z-index: 4;
-  top: 28px;
-  right: 28px;
-  width: 66px;
-  height: 66px;
-  color: var(--ink);
-  background: #fff;
-  box-shadow: 0 8px 20px #26395422;
-}
-
-.route-steps {
-  position: relative;
-  z-index: 5;
-  margin-top: -34px;
-  padding: 18px 38px 28px;
-  border-radius: 34px 34px 0 0;
-  background: #fff;
-}
-
-.grabber {
-  width: 70px;
-  height: 10px;
-  margin: 0 auto 27px;
-  border-radius: 8px;
-  background: #d2d9e3;
-}
-
-.route-steps h2 { margin: 0 0 24px; font-size: clamp(24px, 3.3vw, 32px); font-weight: 800; }
-
-.steps-list { display: flex; justify-content: space-between; gap: 8px; }
-.step-wrapper { position: relative; flex: 1; min-width: 0; text-align: center; }
-
-.step-icon {
-  width: 78px;
-  height: 78px;
-  margin: 0 auto 10px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-}
-
-.step--blue .step-icon { color: var(--blue); background: #e2efff; }
-.step--green .step-icon { color: var(--green); background: #dff5e8; }
-.step--orange .step-icon { color: #f28c00; background: #fff0d8; }
-.step--red .step-icon { color: #ce183c; background: #ffe3e8; }
-
-.step h3 { min-height: 42px; margin: 0 0 5px; font-size: 19px; font-weight: 800; line-height: 1.08; }
-.step p { margin: 0 0 4px; color: var(--muted); font-size: 17px; }
-.step > strong { display: block; margin-bottom: 9px; font-size: 20px; }
-.step .transit-pill.MuiChip-root { min-width: 64px; height: 38px; font-size: 16px; }
-
-.step-arrow { position: absolute; top: 29px; right: -15px; color: #455875; font-size: 34px; }
-
-.start-button.MuiButton-root {
-  width: 100%;
-  min-height: 64px;
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  margin-top: 27px;
-  padding: 13px 24px;
-  border: 0;
-  border-radius: 34px;
-  color: #fff;
-  background: linear-gradient(100deg, #1269df, #0870e8);
-  box-shadow: 0 10px 22px #1269df38;
-  font-family: inherit;
-  font-size: 25px;
-  font-weight: 800;
-  text-transform: none;
-}
-
-@media (max-width: 680px) {
-  .status-bar { height: 33px; padding: 6px 18px 0; font-size: 13px; }
-  .status-bar span { font-size: 10px; }
-  .trip-header { height: 64px; padding: 0 12px; grid-template-columns: 42px 1fr 42px; gap: 6px; }
-  .trip-header h1 { font-size: clamp(22px, 5.7vw, 31px); letter-spacing: -1px; }
-  .icon-button.MuiIconButton-root { width: 42px; height: 42px; }
-  .route-editor, .stats-grid { margin-left: 9px; margin-right: 9px; }
-  .route-editor { gap: 8px; }
-  .route-field { min-height: 72px; padding: 10px 20px 9px 67px; border-radius: 15px; }
-  .route-field .shared-text { font-size: 14px; margin-bottom: 3px; }
-  .route-field strong { font-size: 18px; }
-  .route-line { top: 22px; bottom: 22px; left: 28px; }
-  .route-dot { width: 22px; height: 22px; border-width: 5px; }
-  .swap-button.MuiIconButton-root { top: 48px; right: 6px; width: 57px; height: 57px; }
-  .stats-grid { gap: 9px; margin-top: 12px; margin-bottom: 12px; }
-  .stat-card { min-height: 68px; padding: 8px 11px; gap: 8px; border-radius: 14px; }
-  .stat-card .shared-text { font-size: 13px; margin-bottom: 4px; }
-  .stat-card strong { font-size: 20px; }
-  .stat-icon--muted { width: 40px; height: 40px; }
-  .stat-card > svg { font-size: 30px !important; }
-  .pill-row { gap: 5px; margin-top: 1px; }
-  .transit-pill.MuiChip-root { min-width: 48px; height: 30px; padding: 0 9px; font-size: 14px; }
-  .route-map { height: 430px; }
-  .map-placeholder { height: 430px; }
-  .map-control.MuiIconButton-root { top: 18px; right: 18px; width: 50px; height: 50px; }
-  .route-steps { margin-top: -22px; padding: 12px 8px 18px; border-radius: 23px 23px 0 0; }
-  .grabber { width: 48px; height: 6px; margin-bottom: 17px; }
-  .route-steps h2 { margin-bottom: 15px; font-size: 20px; }
-  .steps-list { gap: 3px; }
-  .step-icon { width: 56px; height: 56px; margin-bottom: 6px; }
-  .step h3 { min-height: 34px; font-size: 14px; }
-  .step p { font-size: 13px; }
-  .step > strong { font-size: 16px; }
-  .step .transit-pill.MuiChip-root { min-width: 49px; height: 29px; font-size: 13px; }
-  .step-arrow { top: 19px; right: -8px; font-size: 24px; }
-  .start-button.MuiButton-root { min-height: 48px; margin-top: 17px; font-size: 18px; }
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
 }

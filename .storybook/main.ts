@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
+import tailwindcss from "@tailwindcss/vite";
 import { loadEnv } from "vite";
 
 const config: StorybookConfig = {
@@ -14,6 +15,7 @@ const config: StorybookConfig = {
   staticDirs: ["../public"],
   async viteFinal(config) {
     const env = loadEnv("development", process.cwd(), "NEXT_PUBLIC_");
+    config.plugins = [...(config.plugins ?? []), tailwindcss()];
     config.define = {
       ...config.define,
       "process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY": JSON.stringify(

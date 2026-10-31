@@ -1,5 +1,5 @@
-// Centro de Governador Valadares, MG.
-export const CENTRO_PADRAO = { lat: -18.8519, lng: -41.9493 };
+// Centro de Vitória, ES.
+export const CENTRO_PADRAO = { lat: -20.3155, lng: -40.3128 };
 export const ZOOM_PADRAO = 14;
 
 export const ESTILO_MAPA: google.maps.MapTypeStyle[] = [

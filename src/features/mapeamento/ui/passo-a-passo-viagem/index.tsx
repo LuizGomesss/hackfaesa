@@ -1,12 +1,13 @@
 "use client";
 
-import NearMe from "@mui/icons-material/NearMe";
+import { Navigation } from "lucide-react";
 import { useId } from "react";
+import { Button } from "@/shared/ui/button";
+import { Card } from "@/shared/ui/card";
 import {
   DiagramaFluxoViagem,
   type EtapaViagem,
 } from "../diagrama-fluxo-viagem";
-import styles from "./passo-a-passo-viagem.module.css";
 
 export interface PassoAPassoViagemProps {
   etapas: EtapaViagem[];
@@ -20,20 +21,17 @@ export function PassoAPassoViagem({
   const tituloId = useId();
 
   return (
-    <section className={styles.root} aria-labelledby={tituloId}>
-      <div className={styles.handle} aria-hidden="true" />
-      <h2 className={styles.title} id={tituloId}>
-        Passo a passo da sua rota
-      </h2>
-      <DiagramaFluxoViagem etapas={etapas} />
-      <button
-        type="button"
-        className={styles.startButton}
-        onClick={onIniciarNavegacao}
-      >
-        <NearMe aria-hidden="true" />
-        Iniciar navegação
-      </button>
-    </section>
+    <Card>
+      <section className="grid gap-4" aria-labelledby={tituloId}>
+        <h2 className="text-lg font-bold" id={tituloId}>
+          Passo a passo
+        </h2>
+        <DiagramaFluxoViagem etapas={etapas} />
+        <Button className="w-full" onClick={onIniciarNavegacao}>
+          <Navigation aria-hidden="true" />
+          Estou indo
+        </Button>
+      </section>
+    </Card>
   );
 }

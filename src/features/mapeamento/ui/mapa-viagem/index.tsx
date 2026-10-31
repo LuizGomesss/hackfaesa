@@ -1,9 +1,8 @@
 "use client";
 
-import GpsFixed from "@mui/icons-material/GpsFixed";
-import MapOutlined from "@mui/icons-material/MapOutlined";
+import { LocateFixed, Map as MapIcon } from "lucide-react";
 import { useGoogleMap } from "@/features/google-maps";
-import styles from "./mapa-viagem.module.css";
+import { Button } from "@/shared/ui/button";
 
 export interface MapaViagemProps {
   origem?: string;
@@ -18,34 +17,51 @@ export function MapaViagem({
 }: MapaViagemProps) {
   const { containerRef, status, error, centralizar, locationStatus } =
     useGoogleMap({ origem, destino });
-  
+
   return (
-    <section className={styles.root} aria-label="Mapa da viagem">
-      <div ref={containerRef} className={styles.canvas} />
-     
+    <section
+      className="relative h-64 overflow-hidden rounded-xl border border-border bg-secondary"
+      aria-label="Mapa da viagem"
+    >
+      <div ref={containerRef} className="absolute inset-0" />
+
       {status !== "ready" && (
-        <div className={styles.placeholder} aria-live="polite">
-          <MapOutlined className={styles.mapIcon} aria-hidden="true" />
-          <p className={styles.title}>
+        <div
+          className="absolute inset-0 grid place-content-center justify-items-center gap-1 p-4 text-center"
+          aria-live="polite"
+        >
+          <MapIcon className="size-8 text-primary" aria-hidden="true" />
+          <p className="font-semibold">
             {status === "error" ? "Mapa indisponível" : "Carregando mapa"}
           </p>
-          <p className={styles.description}>
-            {error ?? "Conectando ao Google Maps…"}
+          <p className="text-sm text-muted-foreground">
+            {error ?? "Conectando ao Google Maps…"} O passo a passo abaixo
+            continua valendo.
           </p>
         </div>
       )}
-      <button
-        type="button"
-        className={styles.centerButton}
-        aria-label="Centralizar mapa"
-        onClick={() => {
-          centralizar();
-          onCentralizar?.();
-        }}
-        disabled={status !== "ready"}
-      >
-        <GpsFixed aria-hidden="true" />
-      </button>
+      {locationStatus && (
+        <p
+          className="absolute inset-x-2 bottom-2 rounded-md bg-card p-2 text-sm"
+          aria-live="polite"
+        >
+          {locationStatus}
+        </p>
+      )}
+      {status === "ready" && (
+        <Button
+          size="icon"
+          variant="outline"
+          className="absolute top-2 right-2"
+          aria-label="Centralizar mapa"
+          onClick={() => {
+            centralizar();
+            onCentralizar?.();
+          }}
+        >
+          <LocateFixed aria-hidden="true" />
+        </Button>
+      )}
     </section>
   );
 }

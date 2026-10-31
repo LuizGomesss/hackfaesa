@@ -1,55 +1,50 @@
 .root {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1320px;
-  padding: 24px 40px 44px;
-  border-radius: 64px;
+  padding: 8px 14px max(12px, env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0;
   color: #080b20;
   background: #fff;
-  box-shadow: 0 -8px 32px #18233512;
+  box-shadow: 0 -4px 16px #18233512;
   font-family: Arial, Helvetica, sans-serif;
 }
-
 .handle {
-  width: 106px;
-  height: 16px;
-  margin: 0 auto 34px;
+  width: 32px;
+  height: 5px;
+  margin: 0 auto 12px;
   border-radius: 999px;
   background: #d3d8e0;
 }
-
 .title {
-  margin: 0 16px 24px;
-  font-size: 46px;
+  margin: 0 0 12px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -1px;
+  letter-spacing: -0.4px;
 }
-
 .startButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 26px;
+  gap: 10px;
   width: 100%;
-  min-height: 134px;
-  margin-top: 18px;
-  padding: 24px;
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 10px;
   border: 0;
-  border-radius: 58px;
+  border-radius: 16px;
   color: #fff;
   background: #0560df;
   font: inherit;
-  font-size: 46px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.2;
   cursor: pointer;
 }
-
 .startButton svg {
   flex-shrink: 0;
-  width: 54px;
-  height: 54px;
+  width: 23px;
+  height: 23px;
 }
 .startButton:hover {
   background: #004fc2;
@@ -58,34 +53,6 @@
   background: #0044a8;
 }
 .startButton:focus-visible {
-  outline: 3px solid #080b20;
-  outline-offset: 5px;
-}
-
-@media (max-width: 700px) {
-  .root {
-    padding: 20px 16px 24px;
-    border-radius: 32px;
-  }
-  .handle {
-    width: 70px;
-    height: 8px;
-    margin-bottom: 24px;
-  }
-  .title {
-    margin: 0 0 20px;
-    font-size: 28px;
-    letter-spacing: -0.5px;
-  }
-  .startButton {
-    min-height: 72px;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 30px;
-    font-size: 24px;
-  }
-  .startButton svg {
-    width: 30px;
-    height: 30px;
-  }
+  outline: 2px solid #080b20;
+  outline-offset: 3px;
 }

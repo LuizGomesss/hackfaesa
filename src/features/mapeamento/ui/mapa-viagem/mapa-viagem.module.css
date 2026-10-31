@@ -4,81 +4,67 @@
   place-items: center;
   box-sizing: border-box;
   width: 100%;
-  max-width: 1320px;
-  min-height: 420px;
-  aspect-ratio: 4 / 3;
-  padding: 100px 24px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: none;
+  padding: 0 16px;
   color: #101a3b;
   background: #eef2f6;
   font-family: Arial, Helvetica, sans-serif;
 }
-
 .placeholder {
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 6px;
   text-align: center;
 }
 .mapIcon {
-  width: 64px;
-  height: 64px;
+  width: 32px;
+  height: 32px;
   color: #8292a8;
 }
 .title {
   margin: 0;
-  font-size: 28px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.2;
 }
 .description {
   margin: 0;
   color: #607291;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 1.5;
 }
-
 .centerButton {
   position: absolute;
-  top: 28px;
-  right: 28px;
+  top: 12px;
+  right: 12px;
   display: grid;
   place-items: center;
-  width: 80px;
-  height: 80px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   border: 0;
   border-radius: 50%;
   color: #080b20;
   background: #fff;
-  box-shadow: 0 6px 20px #2436531f;
+  box-shadow: 0 3px 10px #2436531f;
   cursor: pointer;
 }
-
 .centerButton svg {
-  width: 42px;
-  height: 42px;
+  width: 24px;
+  height: 24px;
 }
 .centerButton:hover:enabled {
   background: #f5f8fc;
 }
 .centerButton:focus-visible {
-  outline: 3px solid #0069ed;
-  outline-offset: 4px;
+  outline: 2px solid #0069ed;
+  outline-offset: 3px;
 }
 .centerButton:disabled {
   color: #8292a8;
   cursor: default;
-}
-
-@media (max-width: 700px) {
-  .centerButton {
-    top: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-  }
-  .centerButton svg {
-    width: 30px;
-    height: 30px;
-  }
 }

@@ -16,31 +16,14 @@ export function MapaViagem({
   origem,
   destino,
 }: MapaViagemProps) {
-  const {
-    containerRef,
-    status,
-    error,
-    centralizar,
-    locationStatus,
-    busStopsStatus,
-  } = useGoogleMap({ origem, destino });
+  const { containerRef, status, error, centralizar } = useGoogleMap({
+    origem,
+    destino,
+  });
 
   return (
     <section className={styles.root} aria-label="Mapa da viagem">
       <div ref={containerRef} className={styles.canvas} />
-      {status === "ready" && (
-        <div className={styles.locationStatus}>
-          <output>{busStopsStatus}</output>
-          {locationStatus && <output>{locationStatus}</output>}
-          <a
-            href="https://www.openstreetmap.org/copyright"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Pontos: © colaboradores do OpenStreetMap
-          </a>
-        </div>
-      )}
 
       {status !== "ready" && (
         <div className={styles.placeholder} aria-live="polite">

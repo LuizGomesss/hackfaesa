@@ -33,3 +33,8 @@ export async function loadGoogleRoutes(): Promise<google.maps.RoutesLibrary> {
   await loadGoogleMaps();
   return importLibrary("routes");
 }
+
+export async function loadGooglePlaces(): Promise<google.maps.PlacesLibrary> {
+  await loadGoogleMaps();
+  return importLibrary("places");
+}

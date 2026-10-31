@@ -1,0 +1,190 @@
+.root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1240px;
+  padding: 16px 4px;
+  color: #080b20;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.root * {
+  box-sizing: border-box;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 68px;
+  margin-bottom: 40px;
+  padding-right: 16px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(22px, 4.8vw, 62px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -1.5px;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 72px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconButton svg {
+  width: 64px;
+  height: 64px;
+}
+.iconButton:hover {
+  background: #edf2f9;
+}
+.iconButton:focus-visible {
+  outline: 3px solid #0869ed;
+  outline-offset: 4px;
+}
+
+.route {
+  position: relative;
+  display: grid;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  min-height: 146px;
+  padding: 20px 170px 20px 38px;
+  border: 2px solid #e7ecf3;
+  border-radius: 32px;
+  background: linear-gradient(110deg, #f4f6f9, #f1f4f8);
+}
+
+.fieldText {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.label {
+  color: #5d687a;
+  font-size: 34px;
+  line-height: 1.1;
+}
+.fieldText strong {
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.originMarker,
+.destinationMarker {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  background: #0069ed;
+  border-radius: 50%;
+}
+
+.originMarker::after,
+.destinationMarker span {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+}
+
+.destinationMarker {
+  background: #00964f;
+  border-radius: 50% 50% 50% 8px;
+  transform: rotate(-45deg);
+}
+.connector {
+  position: absolute;
+  top: 74px;
+  bottom: 74px;
+  left: 62px;
+  border-left: 12px dotted #9bacc5;
+}
+
+.swap {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 12px 32px #c5cedb26;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 700px) {
+  .root {
+    padding: 12px 8px;
+  }
+  .header {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    gap: 8px;
+    padding: 0;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    letter-spacing: -0.6px;
+  }
+  .iconButton {
+    width: 40px;
+    height: 48px;
+  }
+  .iconButton svg {
+    width: 36px;
+    height: 36px;
+  }
+  .field {
+    min-height: 100px;
+    gap: 20px;
+    padding: 18px 64px 18px 18px;
+    border-radius: 22px;
+  }
+  .label {
+    font-size: 18px;
+  }
+  .fieldText strong {
+    font-size: 21px;
+  }
+  .originMarker,
+  .destinationMarker {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+  .originMarker::after,
+  .destinationMarker span {
+    inset: 10px;
+  }
+  .connector {
+    top: 50px;
+    bottom: 50px;
+    left: 32px;
+    border-width: 6px;
+  }
+  .swap {
+    width: 56px;
+    height: 56px;
+    right: 8px;
+  }
+}

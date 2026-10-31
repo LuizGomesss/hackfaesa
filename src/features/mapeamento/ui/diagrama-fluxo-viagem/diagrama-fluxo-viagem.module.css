@@ -1,0 +1,108 @@
+.root {
+  width: 100%;
+  max-width: 1240px;
+  overflow-x: auto;
+  color: #080b20;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.flow {
+  display: flex;
+  justify-content: space-between;
+  gap: 104px;
+  width: max-content;
+  min-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 12px 20px;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex: 0 0 160px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  --accent: #0069df;
+  --tint: #e3f0ff;
+}
+
+.azul {
+  --accent: #0069df;
+  --tint: #e3f0ff;
+}
+.verde {
+  --accent: #008d49;
+  --tint: #def3e6;
+}
+.laranja {
+  --accent: #ff9700;
+  --tint: #fff1db;
+}
+.vermelho {
+  --accent: #cf0032;
+  --tint: #ffe1e8;
+}
+
+.marker {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 122px;
+  height: 122px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--tint);
+}
+
+.icon {
+  width: 76px;
+  height: 76px;
+  font-size: 76px;
+}
+.title {
+  margin: 0 0 14px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.12;
+}
+.description {
+  color: #626e80;
+  font-size: 30px;
+  line-height: 1.2;
+}
+.time {
+  margin-top: 6px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 118px;
+  min-height: 64px;
+  box-sizing: border-box;
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  color: #fff;
+  background: var(--accent);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+}
+.arrow {
+  position: absolute;
+  top: 36px;
+  left: calc(100% + 27px);
+  width: 50px;
+  height: 50px;
+  color: #4c5d73;
+  font-size: 50px;
+}

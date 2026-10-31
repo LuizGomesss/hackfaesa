@@ -1,0 +1,84 @@
+.root {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1320px;
+  min-height: 420px;
+  aspect-ratio: 4 / 3;
+  padding: 100px 24px;
+  color: #101a3b;
+  background: #eef2f6;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.placeholder {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.mapIcon {
+  width: 64px;
+  height: 64px;
+  color: #8292a8;
+}
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.description {
+  margin: 0;
+  color: #607291;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.centerButton {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #080b20;
+  background: #fff;
+  box-shadow: 0 6px 20px #2436531f;
+  cursor: pointer;
+}
+
+.centerButton svg {
+  width: 42px;
+  height: 42px;
+}
+.centerButton:hover:enabled {
+  background: #f5f8fc;
+}
+.centerButton:focus-visible {
+  outline: 3px solid #0069ed;
+  outline-offset: 4px;
+}
+.centerButton:disabled {
+  color: #8292a8;
+  cursor: default;
+}
+
+@media (max-width: 700px) {
+  .centerButton {
+    top: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+  }
+  .centerButton svg {
+    width: 30px;
+    height: 30px;
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "v": 0,
+  "components": {
+    "ui-planejamento-de-viagem": {
+      "id": "ui-planejamento-de-viagem",
+      "name": "PlanejamentoDeViagem",
+      "path": "./src/ui/planejamento-de-viagem/planejamento-de-viagem.stories.tsx",
+      "jsDocTags": {},
+      "reactDocgen": {
+        "description": "",
+        "methods": [],
+        "displayName": "PlanejamentoDeViagem",
+        "definedInFile": "C:\\Users\\louis\\Documents\\GitHub\\hackfaesa\\src\\ui\\planejamento-de-viagem\\index.tsx",
+        "actualName": "PlanejamentoDeViagem",
+        "exportName": "PlanejamentoDeViagem",
+        "props": {
+          "origem": {
+            "required": true,
+            "tsType": {
+              "name": "string"
+            },
+            "description": ""
+          },
+          "destino": {
+            "required": true,
+            "tsType": {
+              "name": "string"
+            },
+            "description": ""
+          },
+          "salvo": {
+            "required": false,
+            "tsType": {
+              "name": "boolean"
+            },
+            "description": "",
+            "defaultValue": {
+              "value": "false",
+              "computed": false
+            }
+          },
+          "onVoltar": {
+            "required": false,
+            "tsType": {
+              "name": "signature",
+              "type": "function",
+              "raw": "() => void",
+              "signature": {
+                "arguments": [],
+                "return": {
+                  "name": "void"
+                }
+              }
+            },
+            "description": ""
+          },
+          "onSalvar": {
+            "required": false,
+            "tsType": {
+              "name": "signature",
+              "type": "function",
+              "raw": "() => void",
+              "signature": {
+                "arguments": [],
+                "return": {
+                  "name": "void"
+                }
+              }
+            },
+            "description": ""
+          },
+          "onInverter": {
+            "required": false,
+            "tsType": {
+              "name": "signature",
+              "type": "function",
+              "raw": "() => void",
+              "signature": {
+                "arguments": [],
+                "return": {
+                  "name": "void"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      },
+      "stories": [
+        {
+          "id": "ui-planejamento-de-viagem--padrao",
+          "name": "Padrao",
+          "snippet": "const Padrao = () => <PlanejamentoDeViagem\r\n    origem=\"Ponto 1 – Av. Central, 100\"\r\n    destino=\"Destino – Universidade GV\"\r\n    salvo={false} />;"
+        },
+        {
+          "id": "ui-planejamento-de-viagem--salvo",
+          "name": "Salvo",
+          "snippet": "const Salvo = () => <PlanejamentoDeViagem\r\n    origem=\"Ponto 1 – Av. Central, 100\"\r\n    destino=\"Destino – Universidade GV\"\r\n    salvo />;"
+        },
+        {
+          "id": "ui-planejamento-de-viagem--mobile",
+          "name": "Mobile",
+          "snippet": "const Mobile = () => <PlanejamentoDeViagem\r\n    origem=\"Ponto 1 – Av. Central, 100\"\r\n    destino=\"Destino – Universidade GV\"\r\n    salvo={false} />;"
+        },
+        {
+          "id": "ui-planejamento-de-viagem--interativo",
+          "name": "Interativo",
+          "snippet": "const Interativo = args => {\r\n    const [origem, setOrigem] = useState(args.origem);\r\n    const [destino, setDestino] = useState(args.destino);\r\n    const [salvo, setSalvo] = useState(args.salvo);\r\n\r\n    return (\r\n        <PlanejamentoDeViagem\r\n            origem={origem}\r\n            destino={destino}\r\n            salvo={salvo}\r\n            onSalvar={() => {\r\n              setSalvo(!salvo);\r\n              args.onSalvar?.();\r\n            }}\r\n            onInverter={() => {\r\n              setOrigem(destino);\r\n              setDestino(origem);\r\n              args.onInverter?.();\r\n            }} />\r\n    );\r\n};"
+        }
+      ],
+      "import": "import { PlanejamentoDeViagem } from 'hackfaesa';"
+    }
+  },
+  "meta": {
+    "docgen": "react-docgen",
+    "durationMs": 90
+  }
+}

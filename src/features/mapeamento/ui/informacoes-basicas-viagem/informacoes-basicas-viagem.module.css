@@ -1,0 +1,134 @@
+.root {
+  display: grid;
+  grid-template-columns: 1.38fr 1fr 1.32fr;
+  gap: 22px;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  color: #080b20;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.root * {
+  box-sizing: border-box;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  min-width: 0;
+  min-height: 152px;
+  padding: 20px 30px;
+  border: 2px solid #eef0f5;
+  border-radius: 30px;
+  background: linear-gradient(115deg, #fff, #fdfdfe);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  font-size: 70px;
+}
+.transferIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #f2f5fa;
+}
+.busIcon {
+  color: #0069ed;
+}
+.content {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.content dt {
+  color: #606979;
+  font-size: 32px;
+  line-height: 1.15;
+}
+.content dd {
+  margin: 0;
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  min-height: 62px;
+  padding: 10px 18px;
+  border-radius: 25px;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+}
+.azul {
+  background: #0069ed;
+}
+.verde {
+  background: #008f4c;
+}
+
+@media (max-width: 1050px) {
+  .root {
+    gap: 12px;
+    padding: 12px;
+  }
+  .card {
+    gap: 16px;
+    padding: 18px;
+  }
+  .icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+  }
+  .transferIcon {
+    width: 54px;
+    height: 54px;
+  }
+  .content dt {
+    font-size: 22px;
+  }
+  .content dd {
+    font-size: 32px;
+  }
+  .lines {
+    gap: 10px;
+  }
+  .pill {
+    min-width: 66px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 18px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 650px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    min-height: 100px;
+    border-radius: 24px;
+  }
+}

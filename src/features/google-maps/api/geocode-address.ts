@@ -1,5 +1,5 @@
 import { importLibrary } from "@googlemaps/js-api-loader";
-import { loadGoogleMaps } from "./load-google-maps";
+import { loadGoogleMaps } from "@/shared/lib/google-maps/load-google-maps";
 
 export async function geocodeAddress(address: string) {
   await loadGoogleMaps();

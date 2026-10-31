@@ -1,2 +1,2 @@
-export { CENTRO_PADRAO, ZOOM_PADRAO } from "./map-config";
-export { useGoogleMap } from "./use-google-map";
+export { CENTRO_PADRAO, ZOOM_PADRAO } from "./config/map-config";
+export { useGoogleMap } from "./hooks/use-google-map";

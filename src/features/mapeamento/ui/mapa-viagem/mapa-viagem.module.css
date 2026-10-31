@@ -48,6 +48,10 @@
   height: 32px;
   color: #8292a8;
 }
+.locationStatus output {
+  display: block;
+  margin-bottom: 4px;
+}
 .title {
   margin: 0;
   font-size: 16px;

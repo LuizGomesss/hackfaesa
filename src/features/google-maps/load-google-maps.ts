@@ -28,3 +28,8 @@ export function loadGoogleMaps(): Promise<google.maps.MapsLibrary> {
   }
   return library;
 }
+
+export async function loadGoogleRoutes(): Promise<google.maps.RoutesLibrary> {
+  await loadGoogleMaps();
+  return importLibrary("routes");
+}

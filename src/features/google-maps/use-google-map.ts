@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createLocationMarker } from "./create-location-marker";
 import { geocodeAddress } from "./geocode-address";
-import { AUTH_ERROR_EVENT, loadGoogleMaps } from "./load-google-maps";
+import {
+  AUTH_ERROR_EVENT,
+  loadGoogleMaps,
+  loadGoogleRoutes,
+} from "./load-google-maps";
 import { CENTRO_PADRAO, ESTILO_MAPA, ZOOM_PADRAO } from "./map-config";
 
 export function useGoogleMap({
@@ -26,6 +30,7 @@ export function useGoogleMap({
   const { lat, lng } = center;
   const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
+  const routeLineRef = useRef<google.maps.Polyline | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +58,14 @@ export function useGoogleMap({
           keyboardShortcuts: true,
         });
         mapRef.current = map;
+        const { Polyline } = await loadGoogleMaps();
+        routeLineRef.current = new Polyline({
+          map,
+          strokeColor: "#1269df",
+          strokeWeight: 5,
+          strokeOpacity: 0.9,
+          clickable: false,
+        });
         setStatus("ready");
       } catch (cause) {
         if (cancelled) return;
@@ -70,6 +83,8 @@ export function useGoogleMap({
       cancelled = true;
       window.removeEventListener(AUTH_ERROR_EVENT, onAuthError);
       if (map) google.maps.event.clearInstanceListeners(map);
+      routeLineRef.current?.setMap(null);
+      routeLineRef.current = null;
       mapRef.current = null;
       container?.replaceChildren();
     };
@@ -110,6 +125,45 @@ export function useGoogleMap({
           );
         }
       });
+      const points = results
+        .filter(
+          (result): result is PromiseFulfilledResult<google.maps.LatLng> =>
+            result.status === "fulfilled",
+        )
+        .map((result) => result.value);
+      if (points.length === 2 && routeLineRef.current) {
+        try {
+          const { Route } = await loadGoogleRoutes();
+          const request: google.maps.routes.ComputeRoutesRequest = {
+            origin: points[0],
+            destination: points[1],
+            travelMode: google.maps.TravelMode.TRANSIT,
+            transitPreference: {
+              allowedTransitModes: ["BUS"],
+              routingPreference: "FEWER_TRANSFERS",
+            },
+            fields: ["path", "legs", "localizedValues", "travelAdvisory"],
+          };
+          const response = await Route.computeRoutes(request);
+          const route = response.routes?.[0];
+          if (!route?.path?.length) {
+            throw new Error(
+              "O Google não encontrou uma rota de transporte público entre esses pontos.",
+            );
+          }
+          if (!cancelled) {
+            routeLineRef.current?.setPath(
+              route.path.map((point) => ({ lat: point.lat, lng: point.lng })),
+            );
+            setLocationStatus("");
+          }
+        } catch {
+          if (!cancelled)
+            setLocationStatus(
+              "Não foi possível calcular uma rota de transporte público entre os pontos.",
+            );
+        }
+      }
       if (!bounds.isEmpty()) {
         boundsRef.current = bounds;
         if (
@@ -125,6 +179,7 @@ export function useGoogleMap({
     void locate();
     return () => {
       cancelled = true;
+      routeLineRef.current?.setPath([]);
       markers.forEach((marker) => {
         marker.setMap(null);
       });

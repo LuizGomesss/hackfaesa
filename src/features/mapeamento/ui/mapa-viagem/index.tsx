@@ -18,9 +18,11 @@ export function MapaViagem({
 }: MapaViagemProps) {
   const { containerRef, status, error, centralizar, locationStatus } =
     useGoogleMap({ origem, destino });
+  
   return (
     <section className={styles.root} aria-label="Mapa da viagem">
       <div ref={containerRef} className={styles.canvas} />
+     
       {status !== "ready" && (
         <div className={styles.placeholder} aria-live="polite">
           <MapOutlined className={styles.mapIcon} aria-hidden="true" />

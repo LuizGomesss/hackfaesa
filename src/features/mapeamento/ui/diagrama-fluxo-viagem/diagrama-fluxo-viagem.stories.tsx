@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DiagramaFluxoViagem } from ".";
 
 const meta = {
-  title: "UI/Diagrama fluxo de viagem",
+  title: "Mapeamento/UI/Diagrama fluxo de viagem",
   component: DiagramaFluxoViagem,
   parameters: { layout: "fullscreen" },
   args: {

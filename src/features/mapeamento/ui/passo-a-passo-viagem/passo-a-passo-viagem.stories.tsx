@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PassoAPassoViagem } from ".";
 
 const meta = {
-  title: "UI/Passo a passo da viagem",
+  title: "Mapeamento/UI/Passo a passo da viagem",
   component: PassoAPassoViagem,
   parameters: { layout: "fullscreen" },
   argTypes: { onIniciarNavegacao: { action: "iniciar navegação" } },

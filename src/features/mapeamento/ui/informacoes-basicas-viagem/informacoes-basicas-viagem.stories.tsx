@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { InformacoesBasicasViagem } from ".";
 
 const meta = {
-  title: "UI/Informações básicas da viagem",
+  title: "Mapeamento/UI/Informações básicas da viagem",
   component: InformacoesBasicasViagem,
   parameters: { layout: "fullscreen" },
   args: {

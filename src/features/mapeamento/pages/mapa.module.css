@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  background: #eef3fa;
+}
+
+.page {
+  width: 100%;
+  max-width: 1320px;
+  min-width: 0;
+  background: #fff;
+  box-shadow: 0 0 0 1px #dbe4f0;
+}
+
+.summary {
+  padding: 24px 28px 0;
+}
+.steps {
+  position: relative;
+  margin-top: -40px;
+}
+
+@media (max-width: 700px) {
+  .summary {
+    padding: 12px 8px 0;
+  }
+  .steps {
+    margin-top: -24px;
+  }
+}

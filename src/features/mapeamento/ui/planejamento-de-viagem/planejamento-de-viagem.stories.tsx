@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PlanejamentoDeViagem } from ".";
 
 const meta = {
-  title: "UI/Planejamento de viagem",
+  title: "Mapeamento/UI/Planejamento de viagem",
   component: PlanejamentoDeViagem,
   parameters: { layout: "fullscreen" },
   args: {

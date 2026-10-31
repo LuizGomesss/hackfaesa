@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MapaViagem } from ".";
 
 const meta = {
-  title: "UI/Mapa da viagem",
+  title: "Mapeamento/UI/Mapa da viagem",
   component: MapaViagem,
   parameters: { layout: "fullscreen" },
   argTypes: { onCentralizar: { action: "centralizar mapa" } },

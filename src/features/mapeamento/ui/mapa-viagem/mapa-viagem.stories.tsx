@@ -5,6 +5,13 @@ const meta = {
   title: "Mapeamento/UI/Mapa da viagem",
   component: MapaViagem,
   parameters: { layout: "fullscreen" },
+  decorators: [
+    (Story) => (
+      <div style={{ height: "100dvh" }}>
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: { onCentralizar: { action: "centralizar mapa" } },
 } satisfies Meta<typeof MapaViagem>;
 

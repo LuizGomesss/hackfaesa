@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
+import { loadEnv } from "vite";
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -11,5 +12,17 @@ const config: StorybookConfig = {
   ],
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
+  async viteFinal(config) {
+    const env = loadEnv("development", process.cwd(), "NEXT_PUBLIC_");
+    config.define = {
+      ...config.define,
+      "process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY": JSON.stringify(
+        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
+          env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
+          "",
+      ),
+    };
+    return config;
+  },
 };
 export default config;

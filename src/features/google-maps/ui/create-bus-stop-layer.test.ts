@@ -2,6 +2,10 @@ import { afterEach, expect, it, vi } from "vitest";
 import { createHtmlMarker } from "@/shared/lib/google-maps/create-html-marker";
 import { createBusStopLayer } from "./create-bus-stop-layer";
 
+vi.mock("react-dom/client", () => ({
+  createRoot: () => ({ render: vi.fn(), unmount: vi.fn() }),
+}));
+
 vi.mock("@/shared/lib/google-maps/create-html-marker", () => ({
   createHtmlMarker: vi.fn(),
 }));

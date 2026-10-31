@@ -1,8 +1,14 @@
+import DirectionsBus from "@mui/icons-material/DirectionsBus";
+import { createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import { createHtmlMarker } from "@/shared/lib/google-maps/create-html-marker";
 import type { BusStop } from "../model/bus-stop";
 
 export function createBusStopLayer(map: google.maps.Map) {
-  const markers = new Map<string, google.maps.OverlayView>();
+  const markers = new Map<
+    string,
+    { marker: google.maps.OverlayView; root: Root }
+  >();
   const info = new google.maps.InfoWindow();
   function add(stop: BusStop) {
     if (markers.has(stop.id)) return;
@@ -10,18 +16,28 @@ export function createBusStopLayer(map: google.maps.Map) {
     button.type = "button";
     button.title = stop.name;
     button.setAttribute("aria-label", stop.name);
-    button.textContent = "🚏";
     Object.assign(button.style, {
       transform: "translate(-50%, -50%)",
-      width: "30px",
-      height: "30px",
-      border: "2px solid white",
+      display: "grid",
+      placeItems: "center",
+      boxSizing: "border-box",
+      width: "40px",
+      height: "40px",
+      padding: "0",
+      border: "4px solid white",
       borderRadius: "50%",
-      background: "#1269df",
-      fontSize: "18px",
+      background: "#233b54",
+      color: "white",
       cursor: "pointer",
-      boxShadow: "0 1px 5px #0004",
+      boxShadow: "0 1px 4px #0003",
     });
+    const root = createRoot(button);
+    root.render(
+      createElement(DirectionsBus, {
+        style: { fontSize: 26 },
+        "aria-hidden": true,
+      }),
+    );
     button.onclick = () => {
       const content = document.createElement("div");
       content.textContent = stop.name;
@@ -29,12 +45,16 @@ export function createBusStopLayer(map: google.maps.Map) {
       info.setPosition({ lat: stop.lat, lng: stop.lng });
       info.open({ map });
     };
-    markers.set(stop.id, createHtmlMarker(map, stop, button, true));
+    markers.set(stop.id, {
+      marker: createHtmlMarker(map, stop, button, true),
+      root,
+    });
   }
   return {
     add,
     dispose() {
-      markers.forEach((marker) => {
+      markers.forEach(({ marker, root }) => {
+        root.unmount();
         marker.setMap(null);
       });
       markers.clear();

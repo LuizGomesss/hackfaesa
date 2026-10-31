@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AUTH_ERROR_EVENT, loadGoogleMaps } from "./load-google-maps";
-import { CENTRO_PADRAO, ZOOM_PADRAO } from "./map-config";
+import { CENTRO_PADRAO, ESTILO_MAPA, ZOOM_PADRAO } from "./map-config";
 
 export function useGoogleMap({
   center = CENTRO_PADRAO,
@@ -38,6 +38,8 @@ export function useGoogleMap({
           center: { lat, lng },
           zoom,
           disableDefaultUI: true,
+          mapTypeId: "roadmap",
+          styles: ESTILO_MAPA,
           gestureHandling: "greedy",
           clickableIcons: false,
           keyboardShortcuts: true,

@@ -64,18 +64,33 @@ export function MapaPage({
   onIniciarNavegacao,
 }: MapaPageProps) {
   const [salvo, setSalvo] = useState(false);
+  const [enderecos, setEnderecos] = useState({ origem: "", destino: "" });
 
   return (
     <main className={styles.root}>
       <div className={styles.page}>
         <div className={styles.summary}>
           <PlanejamentoDeViagem
-            origem="Ponto 1 – Av. Central, 100"
-            destino="Destino – Universidade GV"
+            origem={enderecos.origem}
+            destino={enderecos.destino}
+            onConfirmar={(valores) =>
+              setEnderecos((atual) =>
+                atual.origem === valores.origem &&
+                atual.destino === valores.destino
+                  ? atual
+                  : valores,
+              )
+            }
             salvo={salvo}
             onSalvar={() => setSalvo(!salvo)}
             onVoltar={onVoltar}
-            onInverter={onInverter}
+            onInverter={() => {
+              setEnderecos((atual) => ({
+                origem: atual.destino,
+                destino: atual.origem,
+              }));
+              onInverter?.();
+            }}
           />
           <InformacoesBasicasViagem
             tempoEstimado="48 min"
@@ -86,7 +101,7 @@ export function MapaPage({
             ]}
           />
         </div>
-        <MapaViagem />
+        <MapaViagem origem={enderecos.origem} destino={enderecos.destino} />
         <div className={styles.steps}>
           <PassoAPassoViagem
             etapas={etapas}

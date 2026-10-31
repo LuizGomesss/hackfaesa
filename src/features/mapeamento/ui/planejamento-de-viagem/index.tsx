@@ -13,6 +13,7 @@ export interface PlanejamentoDeViagemProps {
   onVoltar?: () => void;
   onSalvar?: () => void;
   onInverter?: () => void;
+  onConfirmar?: (valores: { origem: string; destino: string }) => void;
 }
 
 export function PlanejamentoDeViagem({
@@ -22,6 +23,7 @@ export function PlanejamentoDeViagem({
   onVoltar,
   onSalvar,
   onInverter,
+  onConfirmar,
 }: PlanejamentoDeViagemProps) {
   return (
     <section className={styles.root} aria-label="Planejamento da viagem">
@@ -49,23 +51,51 @@ export function PlanejamentoDeViagem({
           )}
         </button>
       </header>
-      <div className={styles.route}>
+      <form
+        className={styles.route}
+        onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          onConfirmar?.({
+            origem: String(data.get("origem") ?? "").trim(),
+            destino: String(data.get("destino") ?? "").trim(),
+          });
+        }}
+        onBlur={(event) => {
+          if (event.target instanceof HTMLInputElement)
+            event.currentTarget.requestSubmit();
+        }}
+      >
         <div className={styles.connector} aria-hidden="true" />
         <div className={styles.field}>
           <span className={styles.originMarker} aria-hidden="true" />
-          <div className={styles.fieldText}>
+          <label className={styles.fieldText}>
             <span className={styles.label}>Origem</span>
-            <strong>{origem}</strong>
-          </div>
+            <input
+              key={origem}
+              name="origem"
+              defaultValue={origem}
+              placeholder="Endereço ou CEP de origem"
+              className={styles.input}
+              enterKeyHint="search"
+            />
+          </label>
         </div>
         <div className={styles.field}>
           <span className={styles.destinationMarker} aria-hidden="true">
             <span />
           </span>
-          <div className={styles.fieldText}>
+          <label className={styles.fieldText}>
             <span className={styles.label}>Destino</span>
-            <strong>{destino}</strong>
-          </div>
+            <input
+              key={destino}
+              name="destino"
+              defaultValue={destino}
+              placeholder="Endereço ou CEP de destino"
+              className={styles.input}
+              enterKeyHint="search"
+            />
+          </label>
         </div>
         <button
           type="button"
@@ -75,7 +105,10 @@ export function PlanejamentoDeViagem({
         >
           <SwapVert aria-hidden="true" />
         </button>
-      </div>
+        <button type="submit" className={styles.hiddenSubmit} tabIndex={-1}>
+          Localizar no mapa
+        </button>
+      </form>
     </section>
   );
 }

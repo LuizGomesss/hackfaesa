@@ -29,6 +29,20 @@
   position: absolute;
   inset: 0;
 }
+.locationStatus {
+  position: absolute;
+  z-index: 1;
+  bottom: 28px;
+  left: 12px;
+  right: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  color: #101a3b;
+  box-shadow: 0 2px 8px #0002;
+  font-size: 12px;
+}
 .mapIcon {
   width: 32px;
   height: 32px;

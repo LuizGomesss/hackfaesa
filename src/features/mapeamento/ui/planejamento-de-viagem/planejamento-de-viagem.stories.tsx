@@ -15,6 +15,7 @@ const meta = {
     onVoltar: { action: "voltar" },
     onSalvar: { action: "salvar" },
     onInverter: { action: "inverter" },
+    onConfirmar: { action: "localizar endereços" },
   },
 } satisfies Meta<typeof PlanejamentoDeViagem>;
 
@@ -34,6 +35,11 @@ export const Interativo: Story = {
         origem={origem}
         destino={destino}
         salvo={salvo}
+        onConfirmar={(valores) => {
+          setOrigem(valores.origem);
+          setDestino(valores.destino);
+          args.onConfirmar?.(valores);
+        }}
         onSalvar={() => {
           setSalvo(!salvo);
           args.onSalvar?.();

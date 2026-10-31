@@ -6,11 +6,18 @@ import { useGoogleMap } from "@/features/google-maps";
 import styles from "./mapa-viagem.module.css";
 
 export interface MapaViagemProps {
+  origem?: string;
+  destino?: string;
   onCentralizar?: () => void;
 }
 
-export function MapaViagem({ onCentralizar }: MapaViagemProps) {
-  const { containerRef, status, error, centralizar } = useGoogleMap();
+export function MapaViagem({
+  onCentralizar,
+  origem,
+  destino,
+}: MapaViagemProps) {
+  const { containerRef, status, error, centralizar, locationStatus } =
+    useGoogleMap({ origem, destino });
   return (
     <section className={styles.root} aria-label="Mapa da viagem">
       <div ref={containerRef} className={styles.canvas} />

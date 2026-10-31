@@ -63,6 +63,7 @@
   background: #f3f5f9;
 }
 .fieldText {
+  flex: 1;
   display: grid;
   gap: 3px;
   min-width: 0;
@@ -72,11 +73,36 @@
   font-size: 11px;
   line-height: 1.1;
 }
-.fieldText strong {
+.input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  font-family: inherit;
   font-size: clamp(12px, 3.4vw, 15px);
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+.field:focus-within {
+  border-color: #0069ed;
+  box-shadow: 0 0 0 1px #0069ed;
+}
+.input::placeholder {
+  color: #607291;
+  font-weight: 400;
+}
+.hiddenSubmit {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  padding: 0;
+  border: 0;
 }
 .originMarker,
 .destinationMarker {

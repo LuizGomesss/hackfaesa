@@ -9,6 +9,7 @@ import {
   loadGoogleRoutes,
 } from "./load-google-maps";
 import { CENTRO_PADRAO, ESTILO_MAPA, ZOOM_PADRAO } from "./map-config";
+import { useBusStops } from "./use-bus-stops";
 
 export function useGoogleMap({
   center = CENTRO_PADRAO,
@@ -23,6 +24,7 @@ export function useGoogleMap({
 } = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [activeMap, setActiveMap] = useState<google.maps.Map | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -31,6 +33,7 @@ export function useGoogleMap({
   const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
   const routeLineRef = useRef<google.maps.Polyline | null>(null);
+  const busStopsStatus = useBusStops(activeMap, status === "ready");
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +61,7 @@ export function useGoogleMap({
           keyboardShortcuts: true,
         });
         mapRef.current = map;
+        setActiveMap(map);
         const { Polyline } = await loadGoogleMaps();
         routeLineRef.current = new Polyline({
           map,
@@ -202,5 +206,12 @@ export function useGoogleMap({
     mapRef.current?.setZoom(zoom);
   }, [lat, lng, zoom]);
 
-  return { containerRef, status, error, centralizar, locationStatus };
+  return {
+    containerRef,
+    status,
+    error,
+    centralizar,
+    locationStatus,
+    busStopsStatus,
+  };
 }

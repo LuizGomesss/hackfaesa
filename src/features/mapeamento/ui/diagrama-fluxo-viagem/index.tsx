@@ -9,6 +9,7 @@ export interface EtapaViagem {
   titulo: string;
   descricao: string;
   horario?: string;
+  dataHora?: string;
   icone: "caminhada" | "onibus" | "destino";
   cor: "azul" | "verde" | "laranja" | "vermelho";
   linha?: string;
@@ -41,7 +42,19 @@ export function DiagramaFluxoViagem({ etapas }: DiagramaFluxoViagemProps) {
               <strong className={styles.title}>{etapa.titulo}</strong>
               <span className={styles.description}>{etapa.descricao}</span>
               {etapa.horario ? (
-                <time className={styles.time} dateTime={etapa.horario}>
+                <time
+                  className={styles.time}
+                  dateTime={etapa.dataHora ?? etapa.horario}
+                  title={
+                    etapa.dataHora
+                      ? new Intl.DateTimeFormat("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                          timeZone: "America/Sao_Paulo",
+                        }).format(new Date(etapa.dataHora))
+                      : undefined
+                  }
+                >
                   {etapa.horario}
                 </time>
               ) : (

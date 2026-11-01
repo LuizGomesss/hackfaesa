@@ -1,6 +1,6 @@
 .root {
   display: grid;
-  grid-template-columns: 1.38fr 1fr 1.32fr;
+  grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1.32fr);
   gap: 6px;
   width: 100%;
   margin: 0;
@@ -59,10 +59,35 @@
   font-weight: 700;
   line-height: 1.1;
 }
+.card:first-child {
+  width: fit-content;
+}
+.card:first-child dt {
+  white-space: nowrap;
+  color: inherit;
+}
+.card:first-child dd {
+  white-space: nowrap;
+}
 .lines {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+}
+.tempoVerde {
+  color: #008f4c;
+  background: #ecfdf3;
+  border: none;
+}
+.tempoAmarelo {
+  color: #a87300;
+  background: #fffbeb;
+  border: none;
+}
+.tempoVermelho {
+  color: #dc2626;
+  background: #fef2f2;
+  border: none;
 }
 .pill {
   display: inline-flex;

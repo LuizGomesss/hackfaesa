@@ -6,7 +6,7 @@ const meta = {
   component: InformacoesBasicasViagem,
   parameters: { layout: "fullscreen" },
   args: {
-    tempoEstimado: "48 min",
+    tempoEstimado: 48,
     trocas: 2,
     linhas: [
       { codigo: "L12", cor: "azul" },
@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Padrao: Story = {};
 export const SemTrocas: Story = {
   args: {
-    tempoEstimado: "20 min",
+    tempoEstimado: 20,
     trocas: 0,
     linhas: [{ codigo: "L12", cor: "azul" }],
   },

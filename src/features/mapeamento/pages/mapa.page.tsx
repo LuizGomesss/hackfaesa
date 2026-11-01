@@ -1,57 +1,18 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
-import type { LocalViagem } from "@/features/google-maps";
+import type { LocalViagem, TripSummary } from "@/features/google-maps";
 import type { EtapaViagem } from "../ui/diagrama-fluxo-viagem";
 import { InformacoesBasicasViagem } from "../ui/informacoes-basicas-viagem";
 import { MapaViagem } from "../ui/mapa-viagem";
 import { PassoAPassoViagem } from "../ui/passo-a-passo-viagem";
 import { PlanejamentoDeViagem } from "../ui/planejamento-de-viagem";
+import {
+  DetalhesViagem,
+  formatTripTime,
+  walkDescription,
+} from "./detalhes-viagem";
 import styles from "./mapa.module.css";
-
-const etapas: EtapaViagem[] = [
-  {
-    id: "origem",
-    titulo: "Ponto 1",
-    descricao: "Embarque",
-    horario: "10:45",
-    icone: "caminhada",
-    cor: "azul",
-  },
-  {
-    id: "terminal-central",
-    titulo: "Terminal Central",
-    descricao: "Chegada",
-    horario: "10:51",
-    icone: "onibus",
-    cor: "azul",
-    linha: "L12",
-  },
-  {
-    id: "terminal-leste",
-    titulo: "Terminal Leste",
-    descricao: "Chegada",
-    horario: "11:28",
-    icone: "onibus",
-    cor: "verde",
-    linha: "L28",
-  },
-  {
-    id: "ponto-2",
-    titulo: "Ponto 2",
-    descricao: "Embarque",
-    icone: "caminhada",
-    cor: "laranja",
-  },
-  {
-    id: "destino",
-    titulo: "Destino",
-    descricao: "Chegada",
-    horario: "11:33",
-    icone: "destino",
-    cor: "vermelho",
-  },
-];
 
 export interface MapaPageProps {
   onVoltar?: () => void;
@@ -64,6 +25,52 @@ export function MapaPage({
   onInverter,
   onIniciarNavegacao,
 }: MapaPageProps) {
+  const [trip, setTrip] = useState<TripSummary | null>(null);
+  const etapas: EtapaViagem[] = trip
+    ? [
+        {
+          id: "origem",
+          titulo: "Origem",
+          descricao:
+            walkDescription(trip.firstWalk) || "Caminhe até o embarque",
+          horario: formatTripTime(trip.timing.startTime),
+          dataHora: trip.timing.startTime,
+          icone: "caminhada",
+          cor: "azul",
+        },
+        {
+          id: "embarque",
+          titulo: trip.boarding,
+          descricao:
+            trip.timing.waitingMinutes != null
+              ? `Embarque · ${trip.timing.waitingMinutes} min de espera`
+              : "Embarque",
+          horario: formatTripTime(trip.timing.boardingTime),
+          dataHora: trip.timing.boardingTime,
+          icone: "onibus",
+          cor: "verde",
+          linha: trip.line,
+        },
+        {
+          id: "desembarque",
+          titulo: trip.alighting,
+          descricao: `Desembarque · ${walkDescription(trip.lastWalk) || "Caminhe até o destino"}`,
+          horario: formatTripTime(trip.timing.alightingTime),
+          dataHora: trip.timing.alightingTime,
+          icone: "caminhada",
+          cor: "laranja",
+        },
+        {
+          id: "destino",
+          titulo: "Destino",
+          descricao: "Chegada",
+          horario: formatTripTime(trip.timing.arrivalTime),
+          dataHora: trip.timing.arrivalTime,
+          icone: "destino",
+          cor: "vermelho",
+        },
+      ]
+    : [];
   const [salvo, setSalvo] = useState(false);
   const [enderecos, setEnderecos] = useState<{
     origem: LocalViagem;
@@ -92,18 +99,20 @@ export function MapaPage({
             }}
           />
           <InformacoesBasicasViagem
-            tempoEstimado="48 min"
-            trocas={2}
-            linhas={[
-              { codigo: "L12", cor: "azul" },
-              { codigo: "L28", cor: "verde" },
-            ]}
+            tempoEstimado={trip?.minutes ?? null}
+            trocas={trip ? 0 : null}
+            linhas={trip ? [{ codigo: trip.line, cor: "verde" }] : []}
           />
         </div>
-        <MapaViagem origem={enderecos.origem} destino={enderecos.destino} />
+        <MapaViagem
+          origem={enderecos.origem}
+          destino={enderecos.destino}
+          onTripChange={setTrip}
+        />
         <div className={styles.steps}>
           <PassoAPassoViagem
             etapas={etapas}
+            detalhes={trip ? <DetalhesViagem trip={trip} /> : undefined}
             onIniciarNavegacao={onIniciarNavegacao}
           />
         </div>

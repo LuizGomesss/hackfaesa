@@ -28,7 +28,7 @@ export function useGoogleMap({
     zoom,
   );
   const readyMap = status === "ready" ? activeMap : null;
-  const { boundsRef, locationStatus, routeReady } = useTripRoute(
+  const { boundsRef, locationStatus, routeReady, summary } = useTripRoute(
     readyMap,
     origem,
     destino,
@@ -57,5 +57,6 @@ export function useGoogleMap({
     centralizar,
     locationStatus,
     busStopsStatus,
+    summary,
   };
 }

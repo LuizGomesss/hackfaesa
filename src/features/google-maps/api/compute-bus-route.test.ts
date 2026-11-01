@@ -51,8 +51,11 @@ it("builds walking, one bus, walking using the nearest stops", async () => {
               steps: [
                 {
                   travelMode: "TRANSIT",
+                  staticDurationMillis: 1200000,
                   path: [departure, arrival],
                   transitDetails: {
+                    transitLine: { shortName: "212" },
+                    departureTime: new Date(Date.now() + 900000),
                     departureStop: { location: departure },
                     arrivalStop: { location: arrival },
                   },
@@ -63,8 +66,12 @@ it("builds walking, one bus, walking using the nearest stops", async () => {
         },
       ],
     })
-    .mockResolvedValue({ routes: [{ path: [departure, arrival] }] });
+    .mockResolvedValue({
+      routes: [{ path: [departure, arrival], durationMillis: 600000 }],
+    });
   const trip = await computeBusRoute(origin, destination);
+  expect(trip.summary.minutes).toBe(45);
+  expect(trip.summary.line).toBe("212");
   expect(trip.segments.map((segment) => segment.mode)).toEqual([
     "WALKING",
     "TRANSIT",

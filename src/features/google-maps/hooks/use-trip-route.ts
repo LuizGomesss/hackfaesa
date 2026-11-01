@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
-import { computeBusRoute } from "../api/compute-bus-route";
+import { getBusTraffic } from "../api/bus-traffic";
+import { computeBusRoute, type TripSummary } from "../api/compute-bus-route";
 import { geocodeAddress } from "../api/geocode-address";
 import type { LocalViagem } from "../model/place";
 import { createLocationMarker } from "../ui/create-location-marker";
@@ -18,14 +19,18 @@ export function useTripRoute(
   const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
   const [routeReady, setRouteReady] = useState(false);
+  const [summary, setSummary] = useState<TripSummary | null>(null);
   useEffect(() => {
     setRouteReady(false);
+    setSummary(null);
     if (!map) return;
     const activeMap = map;
     let cancelled = false;
     const routeLines: google.maps.Polyline[] = [];
     const walkingLines: google.maps.Polyline[] = [];
     let animationTimer: ReturnType<typeof setInterval> | undefined;
+    let trafficTimer: ReturnType<typeof setInterval> | undefined;
+    let trafficLines: google.maps.Polyline[] = [];
     const markers: google.maps.OverlayView[] = [];
     boundsRef.current = null;
     async function locate() {
@@ -104,17 +109,42 @@ export function useTripRoute(
                 routeLines.push(walkingLine);
                 continue;
               }
-              routeLines.push(
+              let updating = false;
+              async function updateTraffic() {
+                if (updating) return;
+                updating = true;
+                const sections = await getBusTraffic(segment.path);
+                updating = false;
+                if (cancelled) return;
+                trafficLines.forEach((line) => {
+                  line.setMap(null);
+                });
+                trafficLines = sections.map(
+                  (section) =>
+                    new google.maps.Polyline({
+                      map: activeMap,
+                      path: section.path,
+                      strokeColor: section.color,
+                      strokeWeight: 6,
+                      strokeOpacity: 1,
+                      zIndex: 1,
+                      clickable: false,
+                    }),
+                );
+              }
+              trafficLines.push(
                 new google.maps.Polyline({
                   map: activeMap,
                   path: segment.path,
-                  strokeColor: "#1269df",
-                  strokeWeight: 5,
-                  strokeOpacity: 1,
-                  zIndex: 1,
+                  strokeColor: "#64748b",
+                  strokeWeight: 6,
                   clickable: false,
                 }),
               );
+              void updateTraffic();
+              trafficTimer = setInterval(() => {
+                void updateTraffic();
+              }, 120000);
             }
             let offset = 0;
             animationTimer = setInterval(() => {
@@ -142,6 +172,7 @@ export function useTripRoute(
               ),
             );
             setRouteReady(true);
+            setSummary(trip.summary);
           }
         } catch (error) {
           errors.push(
@@ -168,6 +199,10 @@ export function useTripRoute(
     return () => {
       cancelled = true;
       if (animationTimer !== undefined) clearInterval(animationTimer);
+      if (trafficTimer !== undefined) clearInterval(trafficTimer);
+      trafficLines.forEach((line) => {
+        line.setMap(null);
+      });
       routeLines.forEach((line) => {
         line.setMap(null);
       });
@@ -177,5 +212,5 @@ export function useTripRoute(
     };
   }, [origem, destino, map]);
 
-  return { boundsRef, locationStatus, routeReady };
+  return { boundsRef, locationStatus, routeReady, summary };
 }

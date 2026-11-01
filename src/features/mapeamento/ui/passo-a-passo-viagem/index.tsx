@@ -1,7 +1,7 @@
 "use client";
 
 import NearMe from "@mui/icons-material/NearMe";
-import { useId } from "react";
+import { type ReactNode, useId } from "react";
 import {
   DiagramaFluxoViagem,
   type EtapaViagem,
@@ -10,11 +10,13 @@ import styles from "./passo-a-passo-viagem.module.css";
 
 export interface PassoAPassoViagemProps {
   etapas: EtapaViagem[];
+  detalhes?: ReactNode;
   onIniciarNavegacao?: () => void;
 }
 
 export function PassoAPassoViagem({
   etapas,
+  detalhes,
   onIniciarNavegacao,
 }: PassoAPassoViagemProps) {
   const tituloId = useId();
@@ -26,6 +28,7 @@ export function PassoAPassoViagem({
         Passo a passo da sua rota
       </h2>
       <DiagramaFluxoViagem etapas={etapas} />
+      {detalhes}
       <button
         type="button"
         className={styles.startButton}

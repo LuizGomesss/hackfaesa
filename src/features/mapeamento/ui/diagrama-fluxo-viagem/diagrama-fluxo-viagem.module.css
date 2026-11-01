@@ -1,4 +1,5 @@
 .root {
+  overflow-x: auto;
   width: 100%;
   color: #080b20;
   background: #fff;
@@ -8,7 +9,8 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -17,7 +19,8 @@
 .step {
   position: relative;
   display: flex;
-  flex: 1 1 0;
+  flex: 1 0 96px;
+  width: 96px;
   min-width: 0;
   flex-direction: column;
   align-items: center;

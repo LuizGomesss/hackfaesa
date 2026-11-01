@@ -38,28 +38,40 @@ export function MapaPage({
           icone: "caminhada",
           cor: "azul",
         },
-        {
-          id: "embarque",
-          titulo: trip.boarding,
-          descricao:
-            trip.timing.waitingMinutes != null
-              ? `Embarque · ${trip.timing.waitingMinutes} min de espera`
-              : "Embarque",
-          horario: formatTripTime(trip.timing.boardingTime),
-          dataHora: trip.timing.boardingTime,
-          icone: "onibus",
-          cor: "verde",
-          linha: trip.line,
-        },
-        {
-          id: "desembarque",
-          titulo: trip.alighting,
-          descricao: `Desembarque · ${walkDescription(trip.lastWalk) || "Caminhe até o destino"}`,
-          horario: formatTripTime(trip.timing.alightingTime),
-          dataHora: trip.timing.alightingTime,
-          icone: "caminhada",
-          cor: "laranja",
-        },
+        ...trip.rides.flatMap((ride, index): EtapaViagem[] => [
+          {
+            id: `embarque-${index}`,
+            titulo: ride.boarding,
+            descricao: [
+              index ? "Baldeação" : "Embarque",
+              index && ride.walkBefore.minutes
+                ? walkDescription(ride.walkBefore)
+                : null,
+              ride.waitingMinutes != null
+                ? `${ride.waitingMinutes} min de espera`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · "),
+            horario: formatTripTime(ride.boardingTime),
+            dataHora: ride.boardingTime,
+            icone: "onibus",
+            cor: index % 2 ? "azul" : "verde",
+            linha: ride.line,
+          },
+          {
+            id: `desembarque-${index}`,
+            titulo: ride.alighting,
+            descricao:
+              index < trip.rides.length - 1
+                ? "Desembarque para conexão"
+                : `Desembarque · ${walkDescription(trip.lastWalk) || "Caminhe até o destino"}`,
+            horario: formatTripTime(ride.alightingTime),
+            dataHora: ride.alightingTime,
+            icone: "caminhada",
+            cor: "laranja",
+          },
+        ]),
         {
           id: "destino",
           titulo: "Destino",
@@ -100,8 +112,15 @@ export function MapaPage({
           />
           <InformacoesBasicasViagem
             tempoEstimado={trip?.minutes ?? null}
-            trocas={trip ? 0 : null}
-            linhas={trip ? [{ codigo: trip.line, cor: "verde" }] : []}
+            trocas={trip?.transfers ?? null}
+            linhas={
+              trip
+                ? trip.lines.map((codigo) => ({
+                    codigo,
+                    cor: "verde" as const,
+                  }))
+                : []
+            }
           />
         </div>
         <MapaViagem

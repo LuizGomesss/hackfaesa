@@ -29,8 +29,8 @@ export function useTripRoute(
     const routeLines: google.maps.Polyline[] = [];
     const walkingLines: google.maps.Polyline[] = [];
     let animationTimer: ReturnType<typeof setInterval> | undefined;
-    let trafficTimer: ReturnType<typeof setInterval> | undefined;
-    let trafficLines: google.maps.Polyline[] = [];
+    const trafficTimers: ReturnType<typeof setInterval>[] = [];
+    const trafficGroups: google.maps.Polyline[][] = [];
     const markers: google.maps.OverlayView[] = [];
     boundsRef.current = null;
     async function locate() {
@@ -110,6 +110,8 @@ export function useTripRoute(
                 continue;
               }
               let updating = false;
+              const trafficLines: google.maps.Polyline[] = [];
+              trafficGroups.push(trafficLines);
               async function updateTraffic() {
                 if (updating) return;
                 updating = true;
@@ -119,17 +121,20 @@ export function useTripRoute(
                 trafficLines.forEach((line) => {
                   line.setMap(null);
                 });
-                trafficLines = sections.map(
-                  (section) =>
-                    new google.maps.Polyline({
-                      map: activeMap,
-                      path: section.path,
-                      strokeColor: section.color,
-                      strokeWeight: 6,
-                      strokeOpacity: 1,
-                      zIndex: 1,
-                      clickable: false,
-                    }),
+                trafficLines.length = 0;
+                trafficLines.push(
+                  ...sections.map(
+                    (section) =>
+                      new google.maps.Polyline({
+                        map: activeMap,
+                        path: section.path,
+                        strokeColor: section.color,
+                        strokeWeight: 6,
+                        strokeOpacity: 1,
+                        zIndex: 1,
+                        clickable: false,
+                      }),
+                  ),
                 );
               }
               trafficLines.push(
@@ -142,9 +147,11 @@ export function useTripRoute(
                 }),
               );
               void updateTraffic();
-              trafficTimer = setInterval(() => {
-                void updateTraffic();
-              }, 120000);
+              trafficTimers.push(
+                setInterval(() => {
+                  void updateTraffic();
+                }, 120000),
+              );
             }
             let offset = 0;
             animationTimer = setInterval(() => {
@@ -157,20 +164,16 @@ export function useTripRoute(
                 );
               }
             }, 40);
-            markers.push(
-              createLocationMarker(
-                activeMap,
-                trip.boarding.location,
-                `Embarque`,
-                "#1269df",
-              ),
-              createLocationMarker(
-                activeMap,
-                trip.alighting.location,
-                `Desembarque`,
-                "#1269df",
-              ),
-            );
+            for (const stop of trip.stops) {
+              markers.push(
+                createLocationMarker(
+                  activeMap,
+                  stop.location,
+                  stop.label,
+                  "#1269df",
+                ),
+              );
+            }
             setRouteReady(true);
             setSummary(trip.summary);
           }
@@ -199,8 +202,10 @@ export function useTripRoute(
     return () => {
       cancelled = true;
       if (animationTimer !== undefined) clearInterval(animationTimer);
-      if (trafficTimer !== undefined) clearInterval(trafficTimer);
-      trafficLines.forEach((line) => {
+      trafficTimers.forEach((timer) => {
+        clearInterval(timer);
+      });
+      trafficGroups.flat().forEach((line) => {
         line.setMap(null);
       });
       routeLines.forEach((line) => {

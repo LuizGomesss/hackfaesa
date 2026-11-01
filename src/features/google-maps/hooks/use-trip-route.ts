@@ -24,6 +24,8 @@ export function useTripRoute(
     const activeMap = map;
     let cancelled = false;
     const routeLines: google.maps.Polyline[] = [];
+    const walkingLines: google.maps.Polyline[] = [];
+    let animationTimer: ReturnType<typeof setInterval> | undefined;
     const markers: google.maps.OverlayView[] = [];
     boundsRef.current = null;
     async function locate() {
@@ -75,19 +77,56 @@ export function useTripRoute(
               segment.path.forEach((point) => {
                 bounds.extend(point);
               });
+              if (segment.mode === "WALKING") {
+                const walkingLine = new google.maps.Polyline({
+                  map: activeMap,
+                  path: segment.path,
+                  strokeOpacity: 0,
+                  icons: [
+                    {
+                      icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 3.5,
+                        fillColor: "#ffffff",
+                        fillOpacity: 1,
+                        strokeColor: "#526579",
+                        strokeOpacity: 1,
+                        strokeWeight: 1.5,
+                      },
+                      offset: "0px",
+                      repeat: "20px",
+                    },
+                  ],
+                  zIndex: 3,
+                  clickable: false,
+                });
+                walkingLines.push(walkingLine);
+                routeLines.push(walkingLine);
+                continue;
+              }
               routeLines.push(
                 new google.maps.Polyline({
                   map: activeMap,
                   path: segment.path,
-                  strokeColor:
-                    segment.mode === "WALKING" ? "#ffffff" : "#1269df",
+                  strokeColor: "#1269df",
                   strokeWeight: 5,
                   strokeOpacity: 1,
-                  zIndex: segment.mode === "WALKING" ? 2 : 1,
+                  zIndex: 1,
                   clickable: false,
                 }),
               );
             }
+            let offset = 0;
+            animationTimer = setInterval(() => {
+              offset = (offset + 0.8) % 20;
+              for (const line of walkingLines) {
+                const icons = line.get("icons") as google.maps.IconSequence[];
+                line.set(
+                  "icons",
+                  icons.map((icon) => ({ ...icon, offset: `${offset}px` })),
+                );
+              }
+            }, 40);
             markers.push(
               createLocationMarker(
                 activeMap,
@@ -128,6 +167,7 @@ export function useTripRoute(
     void locate();
     return () => {
       cancelled = true;
+      if (animationTimer !== undefined) clearInterval(animationTimer);
       routeLines.forEach((line) => {
         line.setMap(null);
       });

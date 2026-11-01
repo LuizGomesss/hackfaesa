@@ -46,6 +46,7 @@ export async function computeBusRoute(
       origin: from,
       destination: to,
       travelMode: google.maps.TravelMode.TRANSIT,
+      polylineQuality: "HIGH_QUALITY",
       computeAlternativeRoutes: true,
       transitPreference: {
         allowedTransitModes: ["BUS"],
@@ -63,6 +64,17 @@ export async function computeBusRoute(
         const departure = step.transitDetails?.departureStop?.location;
         const arrival = step.transitDetails?.arrivalStop?.location;
         if (!departure || !arrival || !step.path.length) return [];
+        const first = step.path[0];
+        const last = step.path[step.path.length - 1];
+        if (
+          step.path.some(
+            (point) =>
+              !Number.isFinite(point.lat) || !Number.isFinite(point.lng),
+          ) ||
+          distanceInMeters(first, departure) > 150 ||
+          distanceInMeters(last, arrival) > 150
+        )
+          return [];
         return [step];
       })
       .sort((a, b) => {
@@ -96,6 +108,7 @@ export async function computeBusRoute(
       origin: from,
       destination: to,
       travelMode: google.maps.TravelMode.WALKING,
+      polylineQuality: "HIGH_QUALITY",
       fields: ["path"],
     });
     const path = result.routes?.[0]?.path;

@@ -86,7 +86,7 @@ it("uses the actual transit stops even when Places coordinates differ", async ()
               steps: [
                 {
                   travelMode: "TRANSIT",
-                  path: [departure, arrival],
+                  path: [arrival, arrival],
                   transitDetails: {
                     departureStop: { location: arrival },
                     arrivalStop: { location: arrival },
@@ -120,4 +120,31 @@ it("rejects transfers", async () => {
   await expect(computeBusRoute(origin, destination)).rejects.toThrow(
     "linha direta",
   );
+});
+
+it("rejects bus geometry that does not match its stops", async () => {
+  computeRoutes.mockResolvedValue({
+    routes: [
+      {
+        legs: [
+          {
+            steps: [
+              {
+                travelMode: "TRANSIT",
+                path: [{ lat: 10, lng: 10 }, arrival],
+                transitDetails: {
+                  departureStop: { location: departure },
+                  arrivalStop: { location: arrival },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  await expect(computeBusRoute(origin, destination)).rejects.toThrow(
+    "linha direta",
+  );
+  expect(computeRoutes).toHaveBeenCalledTimes(2);
 });

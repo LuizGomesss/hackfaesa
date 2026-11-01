@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Padrao: Story = { args: { onCentralizar: undefined } };
 export const ComEnderecos: Story = {
   args: {
-    origem: "Praça Sete de Setembro, Belo Horizonte, MG",
-    destino: "Praça da Liberdade, Belo Horizonte, MG",
+    origem: { texto: "Praça Sete de Setembro, Belo Horizonte, MG" },
+    destino: { texto: "Praça da Liberdade, Belo Horizonte, MG" },
   },
 };

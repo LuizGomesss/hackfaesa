@@ -36,8 +36,8 @@ export const Interativo: Story = {
         destino={destino}
         salvo={salvo}
         onConfirmar={(valores) => {
-          setOrigem(valores.origem);
-          setDestino(valores.destino);
+          if (valores.origem) setOrigem(valores.origem.texto);
+          if (valores.destino) setDestino(valores.destino.texto);
           args.onConfirmar?.(valores);
         }}
         onSalvar={() => {

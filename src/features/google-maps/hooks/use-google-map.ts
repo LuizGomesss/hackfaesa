@@ -2,22 +2,25 @@
 
 import { useCallback } from "react";
 import { CENTRO_PADRAO, ZOOM_PADRAO } from "../config/map-config";
+import type { LocalViagem } from "../model/place";
 import { useBusStops } from "./use-bus-stops";
 import { useMapInstance } from "./use-map-instance";
 import { useTripRoute } from "./use-trip-route";
 
+const LOCAL_VAZIO: LocalViagem = { texto: "" };
+
 interface GoogleMapOptions {
   center?: google.maps.LatLngLiteral;
   zoom?: number;
-  origem?: string;
-  destino?: string;
+  origem?: LocalViagem;
+  destino?: LocalViagem;
 }
 
 export function useGoogleMap({
   center = CENTRO_PADRAO,
   zoom = ZOOM_PADRAO,
-  origem = "",
-  destino = "",
+  origem = LOCAL_VAZIO,
+  destino = LOCAL_VAZIO,
 }: GoogleMapOptions = {}) {
   const { lat, lng } = center;
   const { containerRef, mapRef, activeMap, status, error } = useMapInstance(

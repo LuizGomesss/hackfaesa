@@ -95,14 +95,77 @@
   color: #607291;
   font-weight: 400;
 }
-.hiddenSubmit {
+.fieldWrap {
+  position: relative;
+}
+.suggestions,
+.suggestionsStatus {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  padding: 0;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  border: 1px solid #e7ecf3;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 8px 24px #24365333;
+}
+.suggestions {
+  max-height: min(290px, 45dvh);
+  padding: 4px;
+  overflow-y: auto;
+}
+.suggestions[hidden] {
+  display: none;
+}
+.suggestionsStatus {
+  padding: 12px;
+  color: #5d687a;
+  font-size: 13px;
+}
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 8px;
   border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.suggestion:hover,
+.suggestion[aria-selected="true"] {
+  background: #edf2f9;
+}
+.suggestion svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  color: #607291;
+}
+.suggestionText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.suggestionText strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.suggestionText span {
+  overflow: hidden;
+  color: #5d687a;
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .originMarker,
 .destinationMarker {

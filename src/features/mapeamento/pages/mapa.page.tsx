@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { LocalViagem } from "@/features/google-maps";
 import type { EtapaViagem } from "../ui/diagrama-fluxo-viagem";
 import { InformacoesBasicasViagem } from "../ui/informacoes-basicas-viagem";
 import { MapaViagem } from "../ui/mapa-viagem";
@@ -64,22 +65,20 @@ export function MapaPage({
   onIniciarNavegacao,
 }: MapaPageProps) {
   const [salvo, setSalvo] = useState(false);
-  const [enderecos, setEnderecos] = useState({ origem: "", destino: "" });
+  const [enderecos, setEnderecos] = useState<{
+    origem: LocalViagem;
+    destino: LocalViagem;
+  }>({ origem: { texto: "" }, destino: { texto: "" } });
 
   return (
     <main className={styles.root}>
       <div className={styles.page}>
         <div className={styles.summary}>
           <PlanejamentoDeViagem
-            origem={enderecos.origem}
-            destino={enderecos.destino}
+            origem={enderecos.origem.texto}
+            destino={enderecos.destino.texto}
             onConfirmar={(valores) =>
-              setEnderecos((atual) =>
-                atual.origem === valores.origem &&
-                atual.destino === valores.destino
-                  ? atual
-                  : valores,
-              )
+              setEnderecos((atual) => ({ ...atual, ...valores }))
             }
             salvo={salvo}
             onSalvar={() => setSalvo(!salvo)}

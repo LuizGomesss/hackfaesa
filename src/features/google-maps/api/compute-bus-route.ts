@@ -127,10 +127,17 @@ export async function computeBusRoute(
             step.travelMode === "WALKING" || step.travelMode === "TRANSIT",
         ),
     );
-  function walkingDistance(steps: google.maps.routes.RouteLegStep[]) {
-    const walking = steps.filter((step) => step.travelMode === "WALKING");
-    // Prefer measured distances; use walking duration only when metres are absent.
-    const distances = walking.map(
+  function endpointWalkingDistance(candidate: (typeof candidates)[number]) {
+    const firstBus = candidate.buses[0];
+    const lastBus = candidate.buses[candidate.buses.length - 1];
+    const firstWalk = candidate.steps.slice(
+      0,
+      candidate.steps.indexOf(firstBus),
+    );
+    const lastWalk = candidate.steps.slice(
+      candidate.steps.indexOf(lastBus) + 1,
+    );
+    const distances = [...firstWalk, ...lastWalk].map(
       (step) =>
         step.distanceMeters ??
         (step.staticDurationMillis != null
@@ -138,6 +145,13 @@ export async function computeBusRoute(
           : null),
     );
     return sum(distances) ?? Infinity;
+  }
+  function routeDistance(candidate: (typeof candidates)[number]) {
+    return (
+      candidate.route.distanceMeters ??
+      sum(candidate.steps.map((step) => step.distanceMeters)) ??
+      Infinity
+    );
   }
   function duration(candidate: (typeof candidates)[number]) {
     const finalBus = candidate.buses[candidate.buses.length - 1];
@@ -160,14 +174,13 @@ export async function computeBusRoute(
   const eligible = candidates.filter(
     (candidate) => duration(candidate) <= fastest + maximumExtraTime,
   );
-  function score(candidate: (typeof candidates)[number]) {
-    return (
-      duration(candidate) +
-      (walkingDistance(candidate.steps) / 1.3) * 1000 * 2 +
-      (candidate.buses.length - 1) * 3 * 60000
-    );
-  }
-  eligible.sort((a, b) => score(a) - score(b) || duration(a) - duration(b));
+  eligible.sort(
+    (a, b) =>
+      endpointWalkingDistance(a) - endpointWalkingDistance(b) ||
+      routeDistance(a) - routeDistance(b) ||
+      duration(a) - duration(b) ||
+      a.buses.length - b.buses.length,
+  );
   const selected = eligible[0];
   if (!selected)
     throw new Error(

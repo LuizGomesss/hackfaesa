@@ -4,6 +4,8 @@ import Bookmark from "@mui/icons-material/Bookmark";
 import BookmarkBorder from "@mui/icons-material/BookmarkBorder";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import SwapVert from "@mui/icons-material/SwapVert";
+import type { LocalViagem } from "@/features/google-maps";
+import { CampoEndereco } from "./campo-endereco";
 import styles from "./planejamento-de-viagem.module.css";
 
 export interface PlanejamentoDeViagemProps {
@@ -13,7 +15,10 @@ export interface PlanejamentoDeViagemProps {
   onVoltar?: () => void;
   onSalvar?: () => void;
   onInverter?: () => void;
-  onConfirmar?: (valores: { origem: string; destino: string }) => void;
+  onConfirmar?: (valores: {
+    origem?: LocalViagem;
+    destino?: LocalViagem;
+  }) => void;
 }
 
 export function PlanejamentoDeViagem({
@@ -53,50 +58,29 @@ export function PlanejamentoDeViagem({
       </header>
       <form
         className={styles.route}
-        onSubmit={(event) => {
-          event.preventDefault();
-          const data = new FormData(event.currentTarget);
-          onConfirmar?.({
-            origem: String(data.get("origem") ?? "").trim(),
-            destino: String(data.get("destino") ?? "").trim(),
-          });
-        }}
-        onBlur={(event) => {
-          if (event.target instanceof HTMLInputElement)
-            event.currentTarget.requestSubmit();
-        }}
+        onSubmit={(event) => event.preventDefault()}
       >
         <div className={styles.connector} aria-hidden="true" />
-        <div className={styles.field}>
-          <span className={styles.originMarker} aria-hidden="true" />
-          <label className={styles.fieldText}>
-            <span className={styles.label}>Origem</span>
-            <input
-              key={origem}
-              name="origem"
-              defaultValue={origem}
-              placeholder="Endereço ou CEP de origem"
-              className={styles.input}
-              enterKeyHint="search"
-            />
-          </label>
-        </div>
-        <div className={styles.field}>
-          <span className={styles.destinationMarker} aria-hidden="true">
-            <span />
-          </span>
-          <label className={styles.fieldText}>
-            <span className={styles.label}>Destino</span>
-            <input
-              key={destino}
-              name="destino"
-              defaultValue={destino}
-              placeholder="Endereço ou CEP de destino"
-              className={styles.input}
-              enterKeyHint="search"
-            />
-          </label>
-        </div>
+        <CampoEndereco
+          name="origem"
+          label="Origem"
+          placeholder="Endereço ou CEP de origem"
+          valor={origem}
+          marcador={<span className={styles.originMarker} aria-hidden="true" />}
+          onConfirmar={(local) => onConfirmar?.({ origem: local })}
+        />
+        <CampoEndereco
+          name="destino"
+          label="Destino"
+          placeholder="Para onde você vai?"
+          valor={destino}
+          marcador={
+            <span className={styles.destinationMarker} aria-hidden="true">
+              <span />
+            </span>
+          }
+          onConfirmar={(local) => onConfirmar?.({ destino: local })}
+        />
         <button
           type="button"
           className={`${styles.iconButton} ${styles.swap}`}
@@ -104,9 +88,6 @@ export function PlanejamentoDeViagem({
           onClick={onInverter}
         >
           <SwapVert aria-hidden="true" />
-        </button>
-        <button type="submit" className={styles.hiddenSubmit} tabIndex={-1}>
-          Localizar no mapa
         </button>
       </form>
     </section>

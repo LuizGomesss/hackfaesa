@@ -2,12 +2,12 @@
 
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import MapOutlined from "@mui/icons-material/MapOutlined";
-import { useGoogleMap } from "@/features/google-maps";
+import { type LocalViagem, useGoogleMap } from "@/features/google-maps";
 import styles from "./mapa-viagem.module.css";
 
 export interface MapaViagemProps {
-  origem?: string;
-  destino?: string;
+  origem?: LocalViagem;
+  destino?: LocalViagem;
   onCentralizar?: () => void;
 }
 
@@ -16,10 +16,11 @@ export function MapaViagem({
   origem,
   destino,
 }: MapaViagemProps) {
-  const { containerRef, status, error, centralizar } = useGoogleMap({
-    origem,
-    destino,
-  });
+  const { containerRef, status, error, centralizar, locationStatus } =
+    useGoogleMap({
+      origem,
+      destino,
+    });
 
   return (
     <section className={styles.root} aria-label="Mapa da viagem">
@@ -35,6 +36,9 @@ export function MapaViagem({
             {error ?? "Conectando ao Google Maps…"}
           </p>
         </div>
+      )}
+      {locationStatus && (
+        <output className={styles.locationStatus}>{locationStatus}</output>
       )}
       <button
         type="button"

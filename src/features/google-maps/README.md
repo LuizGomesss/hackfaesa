@@ -12,6 +12,8 @@ O restante da aplicação acessa a feature pelo `index.ts`.
 
 O cache pertence à instância de `useBusStops`: mantém os pontos por ID, resultados por área/zoom e consultas em andamento. Falhas permitem nova tentativa. Uma busca concluída continua alimentando o cache mesmo se o usuário mover o mapa; camadas desmontadas não recebem atualizações. Recriar o mapa restaura os marcadores com os dados da mesma sessão. Desmontar a página descarta o cache.
 
+A busca de endereços usa Place Autocomplete com um token por sessão: as consultas digitadas e a escolha são agrupadas até a seleção. Um local escolhido leva suas coordenadas para a rota; texto livre, como um CEP confirmado com Enter, passa pelo Geocoding.
+
 Uma área consultada não representa um inventário completo dos pontos: Nearby Search retorna até 20 resultados por consulta. Alterar o zoom permite uma busca com outro nível de detalhe.
 
 Verificações: `npx vitest run --config vitest.unit.config.mts` e `npm run build`.

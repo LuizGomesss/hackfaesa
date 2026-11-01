@@ -3,12 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { computeBusRoute } from "../api/compute-bus-route";
 import { geocodeAddress } from "../api/geocode-address";
+import type { LocalViagem } from "../model/place";
 import { createLocationMarker } from "../ui/create-location-marker";
+
+async function resolveLocation({ texto, location }: LocalViagem) {
+  return location ? new google.maps.LatLng(location) : geocodeAddress(texto);
+}
 
 export function useTripRoute(
   map: google.maps.Map | null,
-  origem: string,
-  destino: string,
+  origem: LocalViagem,
+  destino: LocalViagem,
 ) {
   const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
@@ -27,16 +32,16 @@ export function useTripRoute(
     boundsRef.current = null;
     async function locate() {
       const addresses = [
-        { label: "Origem", address: origem.trim(), color: "#0069ed" },
-        { label: "Destino", address: destino.trim(), color: "#00964f" },
-      ].filter((item) => item.address);
+        { label: "Origem", local: origem, color: "#0069ed" },
+        { label: "Destino", local: destino, color: "#00964f" },
+      ].filter((item) => item.local.texto.trim());
       if (!addresses.length) {
         setLocationStatus("");
         return;
       }
       setLocationStatus("Localizando endereços…");
       const results = await Promise.allSettled(
-        addresses.map((item) => geocodeAddress(item.address)),
+        addresses.map((item) => resolveLocation(item.local)),
       );
       if (cancelled) return;
       const bounds = new google.maps.LatLngBounds();
@@ -68,15 +73,11 @@ export function useTripRoute(
       if (points.length === 2) {
         try {
           const path = await computeBusRoute(points[0], points[1]);
-          if (!cancelled) {
-            routeLine.setPath(path);
-            setLocationStatus("");
-          }
+          if (!cancelled) routeLine.setPath(path);
         } catch {
-          if (!cancelled)
-            setLocationStatus(
-              "Não foi possível calcular uma rota de transporte público entre os pontos.",
-            );
+          errors.push(
+            "Não foi possível calcular uma rota de transporte público entre os pontos.",
+          );
         }
       }
       if (cancelled) return;

@@ -29,14 +29,6 @@ export function PassoAPassoViagem({
       </h2>
       <DiagramaFluxoViagem etapas={etapas} />
       {detalhes}
-      <button
-        type="button"
-        className={styles.startButton}
-        onClick={onIniciarNavegacao}
-      >
-        <NearMe aria-hidden="true" />
-        Iniciar navegação
-      </button>
     </section>
   );
 }

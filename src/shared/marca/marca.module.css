@@ -1,0 +1,40 @@
+.icone {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  border-radius: 0.272em;
+  color: #fff;
+  background: linear-gradient(145deg, #2c7bec, #1855c5);
+}
+.iconeLetra {
+  font-size: 0.64em;
+  font-weight: 800;
+  line-height: 1;
+  transform: translateY(-0.0375em);
+}
+.iconePonto {
+  position: absolute;
+  right: 0.2em;
+  bottom: 0.224em;
+  width: 0.136em;
+  height: 0.136em;
+  border-radius: 50%;
+  background: #fdb022;
+}
+.marca {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  font-weight: 800;
+  letter-spacing: -0.027em;
+  line-height: 1.1;
+}
+.marcaPonto {
+  width: 0.216em;
+  height: 0.216em;
+  border-radius: 50%;
+  background: #fdb022;
+}

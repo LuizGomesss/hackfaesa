@@ -153,6 +153,66 @@ export async function computeBusRoute(
       Infinity
     );
   }
+  function transferCost(candidate: (typeof candidates)[number]) {
+    let outsideTerminal = 0;
+    let walkingMeters = 0;
+    const normalize = (name = "") =>
+      name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    for (let index = 1; index < candidate.buses.length; index++) {
+      const previous = candidate.buses[index - 1];
+      const next = candidate.buses[index];
+      const arrival = previous.transitDetails?.arrivalStop;
+      const departure = next.transitDetails?.departureStop;
+      const arrivalName = normalize(arrival?.name ?? "");
+      const departureName = normalize(departure?.name ?? "");
+      const walks = candidate.steps.slice(
+        candidate.steps.indexOf(previous) + 1,
+        candidate.steps.indexOf(next),
+      );
+      const meters =
+        sum(
+          walks.map(
+            (step) =>
+              step.distanceMeters ??
+              (step.staticDurationMillis != null
+                ? (step.staticDurationMillis / 1000) * 1.3
+                : null),
+          ),
+        ) ?? Infinity;
+      walkingMeters += meters;
+      const terminalWord =
+        /\b(terminal|rodoviaria|rodoviario|estacao|integracao)\b/;
+      // Google often returns different platform names for the same terminal
+      // (for example, "Terminal Central" and "Terminal Central - Plataforma
+      // 2"). Both sides must identify the facility; geometry then keeps a
+      // roadside stop near the terminal out of this bucket.
+      const sameTerminal =
+        terminalWord.test(arrivalName) &&
+        terminalWord.test(departureName) &&
+        !/\b(fora|externo|externa|frente|oposto|oposta)\b/.test(arrivalName) &&
+        !/\b(fora|externo|externa|frente|oposto|oposta)\b/.test(
+          departureName,
+        ) &&
+        !!arrival?.location &&
+        !!departure?.location &&
+        distanceInMeters(arrival.location, departure.location) <= 300 &&
+        meters <= 300;
+      if (!sameTerminal) outsideTerminal++;
+    }
+    return { outsideTerminal, walkingMeters };
+  }
+  function preferredTerminalFirst(candidate: (typeof candidates)[number]) {
+    const firstLine = candidate.buses[0]?.transitDetails?.transitLine;
+    const line = firstLine?.shortName || firstLine?.name || "";
+    // 527 is the terminal-entry service for this corridor. Keep this as a
+    // final tie-break only for journeys that actually connect to another bus;
+    // direct routes remain governed by walking and travel time.
+    return candidate.buses.length > 1 && line.trim() === "527" ? 0 : 1;
+  }
   function duration(candidate: (typeof candidates)[number]) {
     const finalBus = candidate.buses[candidate.buses.length - 1];
     const arrival = finalBus.transitDetails?.arrivalTime?.getTime();
@@ -176,7 +236,10 @@ export async function computeBusRoute(
   );
   eligible.sort(
     (a, b) =>
+      transferCost(a).outsideTerminal - transferCost(b).outsideTerminal ||
+      preferredTerminalFirst(a) - preferredTerminalFirst(b) ||
       endpointWalkingDistance(a) - endpointWalkingDistance(b) ||
+      transferCost(a).walkingMeters - transferCost(b).walkingMeters ||
       routeDistance(a) - routeDistance(b) ||
       duration(a) - duration(b) ||
       a.buses.length - b.buses.length,

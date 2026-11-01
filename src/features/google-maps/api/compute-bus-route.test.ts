@@ -203,3 +203,54 @@ it("still returns a route when one routing preference fails", async () => {
     .mockResolvedValueOnce({ routes: [direct()] });
   expect((await computeBusRoute(origin, destination)).summary.minutes).toBe(35);
 });
+
+it("prefers 527 arriving inside the terminal over 591 stopping outside", async () => {
+  const internal = transfer();
+  internal.legs[0].steps[1] = bus("527", -40.015, -40.024, 10, 30);
+  internal.legs[0].steps[3] = bus("731", -40.025, -40.035, 40, 60);
+  const external = transfer();
+  external.legs[0].steps[1] = bus("591", -40.015, -40.023, 10, 30);
+  external.legs[0].steps[2] = walk(-40.023, -40.025, 5);
+  external.legs[0].steps[3] = bus("731", -40.025, -40.035, 40, 60);
+  external.legs[0].steps[0] = walk(-40.01, -40.015, 1);
+  computeRoutes.mockResolvedValue({ routes: [external, internal] });
+  const trip = await computeBusRoute(origin, destination);
+  expect(trip.summary.lines).toEqual(["527", "731"]);
+  expect(trip.summary.rides[0].alighting).toBe("Terminal Central");
+});
+
+it("does not treat distant stops with identical terminal names as internal", async () => {
+  const internal = transfer();
+  const external = transfer();
+  const arrival = bus("591", -40.015, -40.02, 10, 30);
+  arrival.transitDetails.arrivalStop.name = "Terminal Central";
+  external.legs[0].steps[1] = arrival;
+  external.legs[0].steps[2] = walk(-40.02, -40.025, 1);
+  external.legs[0].steps[0] = walk(-40.01, -40.015, 1);
+  computeRoutes.mockResolvedValue({ routes: [external, internal] });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "519",
+    "567",
+  ]);
+});
+
+it("uses 527 as the terminal-entry first bus when platform names are generic", async () => {
+  const route527 = transfer();
+  route527.legs[0].steps[1] = bus("527", -40.015, -40.024, 10, 30);
+  const route527Arrival = route527.legs[0].steps[1] as ReturnType<typeof bus>;
+  const route527Departure = route527.legs[0].steps[3] as ReturnType<typeof bus>;
+  route527Arrival.transitDetails.arrivalStop.name = "Rodovia BR-101";
+  route527Departure.transitDetails.departureStop.name = "Ponto 12";
+  const route591 = transfer();
+  route591.legs[0].steps[1] = bus("591", -40.015, -40.023, 10, 30);
+  const route591Arrival = route591.legs[0].steps[1] as ReturnType<typeof bus>;
+  route591Arrival.transitDetails.arrivalStop.name = "Rodovia BR-101";
+  route591.legs[0].steps[2] = walk(-40.023, -40.025, 5);
+  const route591Departure = route591.legs[0].steps[3] as ReturnType<typeof bus>;
+  route591Departure.transitDetails.departureStop.name = "Ponto 12";
+  computeRoutes.mockResolvedValue({ routes: [route591, route527] });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "527",
+    "567",
+  ]);
+});

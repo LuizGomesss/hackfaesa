@@ -59,18 +59,19 @@ export function MapaPage({
             cor: index % 2 ? "azul" : "verde",
             linha: ride.line,
           },
-          {
-            id: `desembarque-${index}`,
-            titulo: ride.alighting,
-            descricao:
-              index < trip.rides.length - 1
-                ? "Desembarque para conexão"
-                : `Desembarque · ${walkDescription(trip.lastWalk) || "Caminhe até o destino"}`,
-            horario: formatTripTime(ride.alightingTime),
-            dataHora: ride.alightingTime,
-            icone: "caminhada",
-            cor: "laranja",
-          },
+          ...(index === trip.rides.length - 1
+            ? [
+                {
+                  id: `desembarque-${index}`,
+                  titulo: ride.alighting,
+                  descricao: `Desembarque · ${walkDescription(trip.lastWalk) || "Caminhe até o destino"}`,
+                  horario: formatTripTime(ride.alightingTime),
+                  dataHora: ride.alightingTime,
+                  icone: "caminhada" as const,
+                  cor: "laranja" as const,
+                },
+              ]
+            : []),
         ]),
         {
           id: "destino",

@@ -1,6 +1,13 @@
-﻿import { distanceInMeters } from "@/shared/lib/geo/distance-in-meters";
 import { loadGoogleRoutes } from "@/shared/lib/google-maps/load-google-maps";
+import type { RouteCandidate } from "../model/route-candidate";
+import {
+  candidateFromRoute,
+  routeDuration,
+  sum,
+} from "../model/route-candidate";
+import { transferCost } from "../model/transfer-terminal";
 import { tripTiming } from "../model/trip-timing";
+import { computeTerminalRoutes } from "./compute-terminal-routes";
 
 export interface TripSegment {
   mode: "WALKING" | "TRANSIT";
@@ -45,37 +52,12 @@ const minutes = (value: number | null | undefined) =>
   value != null && Number.isFinite(value) ? Math.ceil(value / 60000) : null;
 const iso = (date?: Date | null) =>
   date && Number.isFinite(date.getTime()) ? date.toISOString() : undefined;
-function sum(values: (number | null | undefined)[]) {
-  return values.every((value) => value != null && Number.isFinite(value))
-    ? values.reduce<number>((total, value) => total + (value ?? 0), 0)
-    : null;
-}
 function walkSummary(steps: google.maps.routes.RouteLegStep[]): WalkSummary {
   return {
     minutes: minutes(sum(steps.map((step) => step.staticDurationMillis))),
     meters: sum(steps.map((step) => step.distanceMeters)),
   };
 }
-function validBus(step: google.maps.routes.RouteLegStep) {
-  const departure = step.transitDetails?.departureStop?.location;
-  const arrival = step.transitDetails?.arrivalStop?.location;
-  const vehicle = step.transitDetails?.transitLine?.vehicle?.vehicleType;
-  return (
-    !!departure &&
-    !!arrival &&
-    (!vehicle ||
-      vehicle === "BUS" ||
-      vehicle === "TROLLEYBUS" ||
-      vehicle === "INTERCITY_BUS") &&
-    step.path.length > 0 &&
-    step.path.every(
-      (point) => Number.isFinite(point.lat) && Number.isFinite(point.lng),
-    ) &&
-    distanceInMeters(step.path[0], departure) <= 150 &&
-    distanceInMeters(step.path[step.path.length - 1], arrival) <= 150
-  );
-}
-
 export async function computeBusRoute(
   origin: google.maps.LatLng,
   destination: google.maps.LatLng,
@@ -113,20 +95,8 @@ export async function computeBusRoute(
   }
   const candidates = successful
     .flatMap((result) => result.value.routes ?? [])
-    .map((route) => {
-      const steps = (route.legs ?? []).flatMap((leg) => leg.steps);
-      const buses = steps.filter((step) => step.travelMode === "TRANSIT");
-      return { route, steps, buses };
-    })
-    .filter(
-      ({ steps, buses }) =>
-        buses.length > 0 &&
-        buses.every(validBus) &&
-        steps.every(
-          (step) =>
-            step.travelMode === "WALKING" || step.travelMode === "TRANSIT",
-        ),
-    );
+    .map(candidateFromRoute)
+    .filter((candidate): candidate is RouteCandidate => candidate != null);
   function endpointWalkingDistance(candidate: (typeof candidates)[number]) {
     const firstBus = candidate.buses[0];
     const lastBus = candidate.buses[candidate.buses.length - 1];
@@ -153,96 +123,55 @@ export async function computeBusRoute(
       Infinity
     );
   }
-  function transferCost(candidate: (typeof candidates)[number]) {
-    let outsideTerminal = 0;
-    let walkingMeters = 0;
-    const normalize = (name = "") =>
-      name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-    for (let index = 1; index < candidate.buses.length; index++) {
-      const previous = candidate.buses[index - 1];
-      const next = candidate.buses[index];
-      const arrival = previous.transitDetails?.arrivalStop;
-      const departure = next.transitDetails?.departureStop;
-      const arrivalName = normalize(arrival?.name ?? "");
-      const departureName = normalize(departure?.name ?? "");
-      const walks = candidate.steps.slice(
-        candidate.steps.indexOf(previous) + 1,
-        candidate.steps.indexOf(next),
-      );
-      const meters =
-        sum(
-          walks.map(
-            (step) =>
-              step.distanceMeters ??
-              (step.staticDurationMillis != null
-                ? (step.staticDurationMillis / 1000) * 1.3
-                : null),
-          ),
-        ) ?? Infinity;
-      walkingMeters += meters;
-      const terminalWord =
-        /\b(terminal|rodoviaria|rodoviario|estacao|integracao)\b/;
-      // Google often returns different platform names for the same terminal
-      // (for example, "Terminal Central" and "Terminal Central - Plataforma
-      // 2"). Both sides must identify the facility; geometry then keeps a
-      // roadside stop near the terminal out of this bucket.
-      const sameTerminal =
-        terminalWord.test(arrivalName) &&
-        terminalWord.test(departureName) &&
-        !/\b(fora|externo|externa|frente|oposto|oposta)\b/.test(arrivalName) &&
-        !/\b(fora|externo|externa|frente|oposto|oposta)\b/.test(
-          departureName,
-        ) &&
-        !!arrival?.location &&
-        !!departure?.location &&
-        distanceInMeters(arrival.location, departure.location) <= 300 &&
-        meters <= 300;
-      if (!sameTerminal) outsideTerminal++;
-    }
-    return { outsideTerminal, walkingMeters };
-  }
-  function preferredTerminalFirst(candidate: (typeof candidates)[number]) {
-    const firstLine = candidate.buses[0]?.transitDetails?.transitLine;
-    const line = firstLine?.shortName || firstLine?.name || "";
-    // 527 is the terminal-entry service for this corridor. Keep this as a
-    // final tie-break only for journeys that actually connect to another bus;
-    // direct routes remain governed by walking and travel time.
-    return candidate.buses.length > 1 && line.trim() === "527" ? 0 : 1;
-  }
   function duration(candidate: (typeof candidates)[number]) {
-    const finalBus = candidate.buses[candidate.buses.length - 1];
-    const arrival = finalBus.transitDetails?.arrivalTime?.getTime();
-    const lastWalk = sum(
-      candidate.steps
-        .slice(candidate.steps.indexOf(finalBus) + 1)
-        .map((step) => step.staticDurationMillis),
-    );
-    const scheduled =
-      arrival != null && lastWalk != null ? arrival + lastWalk - startedAt : 0;
-    return Math.max(candidate.route.durationMillis ?? 0, scheduled) || Infinity;
+    return routeDuration(candidate, startedAt);
   }
   const fastest = Math.min(...candidates.map(duration));
-  // A shorter walk can justify a modest detour, never hours of extra travel.
+  // The short-walk allowance must not eliminate terminal connections before
+  // their priority is considered. Only exclude extreme detours at this stage.
+  const maximumTerminalDetour = 60 * 60000;
+  const seeds = candidates.filter(
+    (candidate) => duration(candidate) <= fastest + maximumTerminalDetour,
+  );
+  const terminalCandidates = await computeTerminalRoutes(
+    seeds,
+    request,
+    (query) => Route.computeRoutes(query),
+    startedAt,
+  );
+  // Expand the search before ranking: a line number never proves that the
+  // passenger can alight inside the terminal.
+  const allCandidates = [...candidates, ...terminalCandidates];
+  const bestTime = Math.min(...allCandidates.map(duration));
+  const reasonable = allCandidates.filter(
+    (candidate) => duration(candidate) <= bestTime + maximumTerminalDetour,
+  );
+  const fewestExternalTransfers = Math.min(
+    ...reasonable.map((candidate) => transferCost(candidate).outsideTerminal),
+  );
+  const preferred = reasonable.filter(
+    (candidate) =>
+      transferCost(candidate).outsideTerminal === fewestExternalTransfers,
+  );
+  const fastestPreferred = Math.min(...preferred.map(duration));
+  // Compare walking detours only between journeys with the same connection
+  // quality. A slightly faster roadside transfer must not set this cutoff.
   const maximumExtraTime = Math.min(
     30 * 60000,
-    Math.max(15 * 60000, fastest * 0.25),
+    Math.max(15 * 60000, fastestPreferred * 0.25),
   );
-  const eligible = candidates.filter(
-    (candidate) => duration(candidate) <= fastest + maximumExtraTime,
+  const eligible = preferred.filter(
+    (candidate) => duration(candidate) <= fastestPreferred + maximumExtraTime,
   );
   eligible.sort(
     (a, b) =>
       transferCost(a).outsideTerminal - transferCost(b).outsideTerminal ||
-      preferredTerminalFirst(a) - preferredTerminalFirst(b) ||
-      endpointWalkingDistance(a) - endpointWalkingDistance(b) ||
-      transferCost(a).walkingMeters - transferCost(b).walkingMeters ||
-      routeDistance(a) - routeDistance(b) ||
+      endpointWalkingDistance(a) +
+        2 * transferCost(a).walkingMeters -
+        (endpointWalkingDistance(b) + 2 * transferCost(b).walkingMeters) ||
       duration(a) - duration(b) ||
-      a.buses.length - b.buses.length,
+      a.buses.length - b.buses.length ||
+      routeDistance(a) - routeDistance(b),
   );
   const selected = eligible[0];
   if (!selected)
@@ -320,13 +249,12 @@ export async function computeBusRoute(
         label:
           index === 0 ? `Embarque · ${ride.line}` : `Baldeação · ${ride.line}`,
       });
-      stops.push({
-        location: new google.maps.LatLng(arrival.lat, arrival.lng),
-        label:
-          index === buses.length - 1
-            ? "Desembarque"
-            : `Desembarque · ${ride.line}`,
-      });
+      if (index === buses.length - 1) {
+        stops.push({
+          location: new google.maps.LatLng(arrival.lat, arrival.lng),
+          label: "Desembarque",
+        });
+      }
     }
     previousIndex = stepIndex;
     previousArrival = arrivalTime ? Date.parse(arrivalTime) : null;

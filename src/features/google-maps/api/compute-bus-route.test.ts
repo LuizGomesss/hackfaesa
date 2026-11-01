@@ -1,9 +1,15 @@
 ﻿import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { computeBusRoute } from "./compute-bus-route";
 
-const { computeRoutes } = vi.hoisted(() => ({ computeRoutes: vi.fn() }));
+const { computeRoutes, searchTerminals } = vi.hoisted(() => ({
+  computeRoutes: vi.fn(),
+  searchTerminals: vi.fn(),
+}));
 vi.mock("@/shared/lib/google-maps/load-google-maps", () => ({
   loadGoogleRoutes: async () => ({ Route: { computeRoutes } }),
+}));
+vi.mock("./search-transfer-terminals", () => ({
+  searchTransferTerminals: searchTerminals,
 }));
 const start = Date.parse("2026-10-31T12:00:00-03:00");
 const point = (lng: number) => ({ lat: -20, lng });
@@ -68,7 +74,8 @@ const transfer = () => ({
   ],
 });
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
+  searchTerminals.mockResolvedValue([]);
   vi.spyOn(Date, "now").mockReturnValue(start);
   vi.stubGlobal("google", {
     maps: {
@@ -118,7 +125,11 @@ it("keeps both buses, terminal connection walks, waiting times and fare", async 
     new Date(start + 65 * 60000).toISOString(),
   );
   expect(trip.summary.fare).toBe("R$ 4,90");
-  expect(trip.stops).toHaveLength(4);
+  expect(trip.stops.map((stop) => stop.label)).toEqual([
+    "Embarque · 519",
+    "Baldeação · 567",
+    "Desembarque",
+  ]);
   expect(trip.segments.map((segment) => segment.mode)).toEqual([
     "WALKING",
     "TRANSIT",
@@ -176,7 +187,7 @@ it("supports three buses and two terminal transfers", async () => {
   const trip = await computeBusRoute(origin, destination);
   expect(trip.summary.transfers).toBe(2);
   expect(trip.summary.lines).toEqual(["519", "567", "212"]);
-  expect(trip.stops).toHaveLength(6);
+  expect(trip.stops).toHaveLength(4);
   expect(trip.summary.minutes).toBe(80);
 });
 
@@ -219,6 +230,22 @@ it("prefers 527 arriving inside the terminal over 591 stopping outside", async (
   expect(trip.summary.rides[0].alighting).toBe("Terminal Central");
 });
 
+it("prioritizes an internal terminal connection before applying the short-walk time allowance", async () => {
+  const roadside = transfer();
+  roadside.durationMillis = 45 * 60000;
+  roadside.legs[0].steps[1] = bus("591", -40.015, -40.023, 10, 26);
+  roadside.legs[0].steps[2] = walk(-40.023, -40.025, 5);
+  roadside.legs[0].steps[3] = bus("738", -40.025, -40.035, 36, 40);
+  const internal = transfer();
+  internal.durationMillis = 61 * 60000;
+  internal.legs[0].steps[1] = bus("529", -40.015, -40.024, 10, 30);
+  internal.legs[0].steps[3] = bus("741", -40.025, -40.035, 40, 56);
+  computeRoutes.mockResolvedValue({ routes: [roadside, internal] });
+  const trip = await computeBusRoute(origin, destination);
+  expect(trip.summary.lines).toEqual(["529", "741"]);
+  expect(trip.summary.minutes).toBe(61);
+});
+
 it("does not treat distant stops with identical terminal names as internal", async () => {
   const internal = transfer();
   const external = transfer();
@@ -234,7 +261,7 @@ it("does not treat distant stops with identical terminal names as internal", asy
   ]);
 });
 
-it("uses 527 as the terminal-entry first bus when platform names are generic", async () => {
+it("prefers the shorter transfer walk when platform names are generic", async () => {
   const route527 = transfer();
   route527.legs[0].steps[1] = bus("527", -40.015, -40.024, 10, 30);
   const route527Arrival = route527.legs[0].steps[1] as ReturnType<typeof bus>;
@@ -253,4 +280,142 @@ it("uses 527 as the terminal-entry first bus when platform names are generic", a
     "527",
     "567",
   ]);
+});
+
+function roadsideTransfer() {
+  const route = transfer();
+  route.legs[0].steps[1] = bus("591", -40.015, -40.023, 10, 30);
+  route.legs[0].steps[2] = walk(-40.023, -40.025, 5);
+  route.legs[0].steps[3] = bus("738", -40.025, -40.035, 40, 60);
+  return route;
+}
+
+function terminalAccess(internal = true) {
+  const arrival = bus(internal ? "527" : "591", -40.015, -40.024, 10, 32);
+  arrival.transitDetails.arrivalStop.name = internal
+    ? "T. Central - Plataforma 1"
+    : "Rodovia, em frente ao Terminal Central";
+  return {
+    legs: [
+      { steps: [walk(-40.01, -40.015, 5), arrival, walk(-40.024, -40.025, 1)] },
+    ],
+  };
+}
+
+function terminalExit(departure = 40, arrival = 60) {
+  const next = bus("738", -40.025, -40.035, departure, arrival);
+  next.transitDetails.departureStop.name = "Terminal Central - Plataforma 2";
+  return {
+    localizedValues: { transitFare: "R$ 4,90" },
+    legs: [{ steps: [next, walk(-40.035, -40.04, 5)] }],
+  };
+}
+
+it("finds 527 through the terminal even when complete-route responses only offer 591", async () => {
+  computeRoutes.mockImplementation(async (request) => {
+    if (request.destination === destination && request.origin === origin)
+      return { routes: [roadsideTransfer()] };
+    if (request.origin === origin) return { routes: [terminalAccess()] };
+    return { routes: [terminalExit()] };
+  });
+  const trip = await computeBusRoute(origin, destination);
+  expect(trip.summary.lines).toEqual(["527", "738"]);
+  expect(trip.summary.minutes).toBe(65);
+  expect(trip.summary.fare).toBeNull();
+  expect(trip.summary.timing.missedConnection).toBe(false);
+  expect(trip.stops.map((stop) => stop.label)).toEqual([
+    "Embarque · 527",
+    "Baldeação · 738",
+    "Desembarque",
+  ]);
+  expect(computeRoutes).toHaveBeenCalledWith(
+    expect.objectContaining({
+      origin: point(-40.025),
+      destination,
+      departureTime: new Date(start + 36 * 60000),
+    }),
+  );
+});
+
+it("does not accept alighting outside the terminal just because the query targets it", async () => {
+  computeRoutes.mockImplementation(async (request) => ({
+    routes: [
+      request.destination === destination
+        ? roadsideTransfer()
+        : terminalAccess(false),
+    ],
+  }));
+  const trip = await computeBusRoute(origin, destination);
+  expect(trip.summary.lines).toEqual(["591", "738"]);
+  expect(
+    computeRoutes.mock.calls.every(([request]) => request.origin === origin),
+  ).toBe(true);
+});
+
+it("rejects stitched connections that depart before the terminal arrival and buffer", async () => {
+  computeRoutes.mockImplementation(async (request) => {
+    if (request.destination === destination && request.origin === origin)
+      return { routes: [roadsideTransfer()] };
+    return {
+      routes: [request.origin === origin ? terminalAccess() : terminalExit(33)],
+    };
+  });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "591",
+    "738",
+  ]);
+});
+
+it("does not replace a roadside connection with hours of terminal detour", async () => {
+  computeRoutes.mockImplementation(async (request) => {
+    if (request.destination === destination && request.origin === origin)
+      return { routes: [roadsideTransfer()] };
+    return {
+      routes: [
+        request.origin === origin ? terminalAccess() : terminalExit(250, 280),
+      ],
+    };
+  });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "591",
+    "738",
+  ]);
+});
+
+it("retains the base journey if terminal route requests fail", async () => {
+  computeRoutes.mockImplementation(async (request) => {
+    if (request.destination === destination)
+      return { routes: [roadsideTransfer()] };
+    throw new Error("UNAVAILABLE");
+  });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "591",
+    "738",
+  ]);
+});
+
+it("uses nearby terminal discovery for anonymous platforms", async () => {
+  const seed = roadsideTransfer();
+  const boarding = bus("738", -40.025, -40.035, 40, 60);
+  boarding.transitDetails.departureStop.name = "Ponto 12";
+  seed.legs[0].steps[3] = boarding;
+  searchTerminals.mockResolvedValue([
+    {
+      name: "Terminal Central",
+      location: point(-40.025),
+      waypoint: point(-40.025),
+    },
+  ]);
+  computeRoutes.mockImplementation(async (request) => {
+    if (request.destination === destination && request.origin === origin)
+      return { routes: [seed] };
+    return {
+      routes: [request.origin === origin ? terminalAccess() : terminalExit()],
+    };
+  });
+  expect((await computeBusRoute(origin, destination)).summary.lines).toEqual([
+    "527",
+    "738",
+  ]);
+  expect(searchTerminals).toHaveBeenCalledWith([point(-40.025)]);
 });

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { computeBusRoute } from "../api/compute-bus-route";
@@ -21,13 +21,7 @@ export function useTripRoute(
     if (!map) return;
     const activeMap = map;
     let cancelled = false;
-    const routeLine = new google.maps.Polyline({
-      map,
-      strokeColor: "#1269df",
-      strokeWeight: 5,
-      strokeOpacity: 0.9,
-      clickable: false,
-    });
+    const routeLines: google.maps.Polyline[] = [];
     const markers: google.maps.OverlayView[] = [];
     boundsRef.current = null;
     async function locate() {
@@ -72,11 +66,46 @@ export function useTripRoute(
         .map((result) => result.value);
       if (points.length === 2) {
         try {
-          const path = await computeBusRoute(points[0], points[1]);
-          if (!cancelled) routeLine.setPath(path);
-        } catch {
+          setLocationStatus("Calculando caminhada e trajeto de ônibus…");
+          const trip = await computeBusRoute(points[0], points[1]);
+          if (!cancelled) {
+            for (const segment of trip.segments) {
+              segment.path.forEach((point) => {
+                bounds.extend(point);
+              });
+              routeLines.push(
+                new google.maps.Polyline({
+                  map: activeMap,
+                  path: segment.path,
+                  strokeColor:
+                    segment.mode === "WALKING" ? "#ffffff" : "#1269df",
+                  strokeWeight: 5,
+                  strokeOpacity: 1,
+                  zIndex: segment.mode === "WALKING" ? 2 : 1,
+                  clickable: false,
+                }),
+              );
+            }
+            markers.push(
+              createLocationMarker(
+                activeMap,
+                trip.boarding.location,
+                `Embarque: ${trip.boarding.name}`,
+                "#1269df",
+              ),
+              createLocationMarker(
+                activeMap,
+                trip.alighting.location,
+                `Desembarque: ${trip.alighting.name}`,
+                "#1269df",
+              ),
+            );
+          }
+        } catch (error) {
           errors.push(
-            "Não foi possível calcular uma rota de transporte público entre os pontos.",
+            error instanceof Error
+              ? error.message
+              : "Não foi possível calcular a viagem.",
           );
         }
       }
@@ -96,7 +125,9 @@ export function useTripRoute(
     void locate();
     return () => {
       cancelled = true;
-      routeLine.setMap(null);
+      routeLines.forEach((line) => {
+        line.setMap(null);
+      });
       markers.forEach((marker) => {
         marker.setMap(null);
       });

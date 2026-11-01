@@ -18,12 +18,12 @@ function Item({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-2">
-      <dt className="flex items-center gap-1 text-xs text-muted-foreground">
-        {icone}
-        {titulo}
-      </dt>
-      <dd className="mt-1 font-semibold">{children}</dd>
+    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-border bg-card p-2">
+      {icone}
+      <div className="min-w-0">
+        <dt className="text-xs text-muted-foreground">{titulo}</dt>
+        <dd className="font-bold">{children}</dd>
+      </div>
     </div>
   );
 }
@@ -35,23 +35,25 @@ export function InformacoesBasicasViagem({
 }: InformacoesBasicasViagemProps) {
   return (
     <dl
-      className="grid grid-cols-3 gap-2"
+      className="grid grid-cols-[1.2fr_0.8fr_1fr] gap-1.5"
       aria-label="Informações básicas da viagem"
     >
       <Item
-        icone={<Clock className="size-3.5" aria-hidden="true" />}
-        titulo="Tempo"
+        icone={<Clock className="size-5 shrink-0" aria-hidden="true" />}
+        titulo="Tempo estimado"
       >
         {tempoEstimado}
       </Item>
       <Item
-        icone={<ArrowLeftRight className="size-3.5" aria-hidden="true" />}
+        icone={
+          <ArrowLeftRight className="size-5 shrink-0" aria-hidden="true" />
+        }
         titulo="Trocas"
       >
         {trocas}
       </Item>
       <Item
-        icone={<Bus className="size-3.5" aria-hidden="true" />}
+        icone={<Bus className="size-5 shrink-0" aria-hidden="true" />}
         titulo="Linhas"
       >
         <span className="flex flex-wrap gap-1">

@@ -2,25 +2,31 @@
 
 import { LocateFixed, Map as MapIcon } from "lucide-react";
 import { useGoogleMap } from "@/features/google-maps";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
 export interface MapaViagemProps {
   origem?: string;
   destino?: string;
   onCentralizar?: () => void;
+  className?: string;
 }
 
 export function MapaViagem({
   onCentralizar,
   origem,
   destino,
+  className,
 }: MapaViagemProps) {
   const { containerRef, status, error, centralizar, locationStatus } =
     useGoogleMap({ origem, destino });
 
   return (
     <section
-      className="relative h-64 overflow-hidden rounded-xl border border-border bg-secondary"
+      className={cn(
+        "relative h-64 overflow-hidden rounded-xl border border-border bg-secondary",
+        className,
+      )}
       aria-label="Mapa da viagem"
     >
       <div ref={containerRef} className="absolute inset-0" />

@@ -3,7 +3,6 @@
 import { Navigation } from "lucide-react";
 import { useId } from "react";
 import { Button } from "@/shared/ui/button";
-import { Card } from "@/shared/ui/card";
 import {
   DiagramaFluxoViagem,
   type EtapaViagem,
@@ -21,17 +20,22 @@ export function PassoAPassoViagem({
   const tituloId = useId();
 
   return (
-    <Card>
-      <section className="grid gap-4" aria-labelledby={tituloId}>
-        <h2 className="text-lg font-bold" id={tituloId}>
-          Passo a passo
-        </h2>
-        <DiagramaFluxoViagem etapas={etapas} />
-        <Button className="w-full" onClick={onIniciarNavegacao}>
-          <Navigation aria-hidden="true" />
-          Estou indo
-        </Button>
-      </section>
-    </Card>
+    <section
+      className="relative -mt-5 grid gap-3 rounded-t-3xl bg-card px-4 pt-2.5 pb-4 shadow-[0_-6px_18px_#1a2b4014]"
+      aria-labelledby={tituloId}
+    >
+      <span
+        className="mx-auto h-1.5 w-11 rounded-full bg-border"
+        aria-hidden="true"
+      />
+      <h2 className="text-lg font-bold" id={tituloId}>
+        Passo a passo da sua rota
+      </h2>
+      <DiagramaFluxoViagem etapas={etapas} />
+      <Button className="w-full" onClick={onIniciarNavegacao}>
+        <Navigation aria-hidden="true" />
+        Estou indo
+      </Button>
+    </section>
   );
 }

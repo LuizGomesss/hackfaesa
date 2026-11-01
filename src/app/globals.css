@@ -31,6 +31,7 @@
   --lotacao-alta-fundo: #fde8dd;
   --lotacao-critica: #a11212;
   --lotacao-critica-fundo: #fbe2e2;
+  --destino-fundo: #fbe3ee;
 }
 
 html[data-contraste="alto"] {
@@ -55,6 +56,7 @@ html[data-contraste="alto"] {
   --lotacao-alta-fundo: #ffffff;
   --lotacao-critica: #6e0000;
   --lotacao-critica-fundo: #ffffff;
+  --destino-fundo: #ffffff;
 }
 
 html[data-texto="grande"] {

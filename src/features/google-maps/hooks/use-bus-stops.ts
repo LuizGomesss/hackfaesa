@@ -7,8 +7,13 @@ import { createBusStopCache } from "../model/bus-stop-cache";
 import { getBusStopSearch } from "../model/bus-stop-search";
 import { createBusStopLayer } from "../ui/create-bus-stop-layer";
 
-export function useBusStops(map: google.maps.Map | null, ready: boolean) {
+export function useBusStops(
+  map: google.maps.Map | null,
+  ready: boolean,
+  visible = true,
+) {
   const [message, setMessage] = useState("");
+  const layerRef = useRef<ReturnType<typeof createBusStopLayer> | null>(null);
   const cacheRef = useRef<ReturnType<typeof createBusStopCache> | null>(null);
   if (!cacheRef.current) cacheRef.current = createBusStopCache();
 
@@ -19,6 +24,7 @@ export function useBusStops(map: google.maps.Map | null, ready: boolean) {
     if (!session) return;
     let disposed = false;
     const layer = createBusStopLayer(activeMap);
+    layerRef.current = layer;
     for (const stop of session.values()) layer.add(stop);
 
     const update = async () => {
@@ -53,7 +59,12 @@ export function useBusStops(map: google.maps.Map | null, ready: boolean) {
       schedule.cancel();
       listener.remove();
       layer.dispose();
+      layerRef.current = null;
     };
   }, [map, ready]);
+  useEffect(() => {
+    if (!map || !ready) return;
+    layerRef.current?.setVisible(visible);
+  }, [visible, map, ready]);
   return message;
 }

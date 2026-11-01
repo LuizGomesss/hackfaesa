@@ -17,7 +17,9 @@ export function useTripRoute(
 ) {
   const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
+  const [routeReady, setRouteReady] = useState(false);
   useEffect(() => {
+    setRouteReady(false);
     if (!map) return;
     const activeMap = map;
     let cancelled = false;
@@ -90,16 +92,17 @@ export function useTripRoute(
               createLocationMarker(
                 activeMap,
                 trip.boarding.location,
-                `Embarque: ${trip.boarding.name}`,
+                `Embarque`,
                 "#1269df",
               ),
               createLocationMarker(
                 activeMap,
                 trip.alighting.location,
-                `Desembarque: ${trip.alighting.name}`,
+                `Desembarque`,
                 "#1269df",
               ),
             );
+            setRouteReady(true);
           }
         } catch (error) {
           errors.push(
@@ -134,5 +137,5 @@ export function useTripRoute(
     };
   }, [origem, destino, map]);
 
-  return { boundsRef, locationStatus };
+  return { boundsRef, locationStatus, routeReady };
 }

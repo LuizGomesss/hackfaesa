@@ -28,8 +28,12 @@ export function useGoogleMap({
     zoom,
   );
   const readyMap = status === "ready" ? activeMap : null;
-  const { boundsRef, locationStatus } = useTripRoute(readyMap, origem, destino);
-  const busStopsStatus = useBusStops(readyMap, status === "ready");
+  const { boundsRef, locationStatus, routeReady } = useTripRoute(
+    readyMap,
+    origem,
+    destino,
+  );
+  const busStopsStatus = useBusStops(readyMap, status === "ready", !routeReady);
   const centralizar = useCallback(() => {
     if (boundsRef.current) {
       if (

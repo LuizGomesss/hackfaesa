@@ -7,9 +7,10 @@ import type { BusStop } from "../model/bus-stop";
 export function createBusStopLayer(map: google.maps.Map) {
   const markers = new Map<
     string,
-    { marker: google.maps.OverlayView; root: Root }
+    { marker: google.maps.OverlayView; root: Root; button: HTMLButtonElement }
   >();
   const info = new google.maps.InfoWindow();
+  let visible = true;
   function add(stop: BusStop) {
     if (markers.has(stop.id)) return;
     const button = document.createElement("button");
@@ -18,7 +19,7 @@ export function createBusStopLayer(map: google.maps.Map) {
     button.setAttribute("aria-label", stop.name);
     Object.assign(button.style, {
       transform: "translate(-50%, -50%)",
-      display: "grid",
+      display: visible ? "grid" : "none",
       placeItems: "center",
       boxSizing: "border-box",
       width: "40px",
@@ -48,10 +49,18 @@ export function createBusStopLayer(map: google.maps.Map) {
     markers.set(stop.id, {
       marker: createHtmlMarker(map, stop, button, true),
       root,
+      button,
     });
   }
   return {
     add,
+    setVisible(value: boolean) {
+      visible = value;
+      if (!visible) info.close();
+      markers.forEach(({ button }) => {
+        button.style.display = visible ? "grid" : "none";
+      });
+    },
     dispose() {
       markers.forEach(({ marker, root }) => {
         root.unmount();
